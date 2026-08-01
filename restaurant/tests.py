@@ -19,13 +19,13 @@ class LandingPageTests(TestCase):
     def setUp(self):
         cache.clear()
         site = RestaurantSettings.load()
-        site.whatsapp_number = '972597862389'
+        site.whatsapp_number = '970500000000'
         site.save()
 
     def test_home_page_loads(self):
         response = self.client.get(reverse('restaurant:home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'B12')
+        self.assertContains(response, 'فرايز ستيشن')
         self.assertContains(response, 'واتساب')
         self.assertContains(response, 'value="pickup"')
         self.assertContains(response, 'value="delivery"')
@@ -92,7 +92,7 @@ class LandingPageTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].startswith('https://wa.me/972597862389'))
+        self.assertTrue(response['Location'].startswith('https://wa.me/970500000000'))
         self.assertEqual(Reservation.objects.count(), 1)
 
     def test_invalid_reservation_is_not_saved(self):
@@ -253,7 +253,7 @@ class LandingPageTests(TestCase):
         self.assertContains(sitemap, '/menu/')
 
     def test_standalone_menu_uses_the_live_catalog_and_cart(self):
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(
             category=category,
             name_ar='وجبة المنيو',
@@ -344,7 +344,7 @@ class LandingPageTests(TestCase):
 
     def test_relative_static_image_paths_are_valid_in_admin_forms(self):
         site = RestaurantSettings.load()
-        site.hero_image_url = '/static/restaurant/img/v3/hero-b12.webp'
+        site.hero_image_url = '/static/restaurant/img/fries-station/hero/hero-fries-station.webp'
         SiteForm = modelform_factory(RestaurantSettings, fields='__all__')
         site_data = {
             name: (getattr(site, name).name if hasattr(getattr(site, name), 'name') else getattr(site, name))
@@ -355,7 +355,7 @@ class LandingPageTests(TestCase):
         category = Category.objects.create(
             name_ar='صورة محلية',
             name_en='Local image',
-            image_url='/static/restaurant/img/v3/pizza-960.webp',
+            image_url='/static/restaurant/img/fries-station/menu/classic-fries-480.webp',
         )
         CategoryForm = modelform_factory(Category, fields='__all__')
         category_data = {
@@ -408,7 +408,7 @@ class LandingPageTests(TestCase):
         self.assertContains(response, 'class="social-whatsapp js-open-cart"')
 
     def test_best_sellers_use_saved_online_and_cashier_order_quantities(self):
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(
             category=category,
             name_ar='كباب الاختبار',
@@ -869,7 +869,7 @@ class ControlPanelTests(TestCase):
         RestaurantSettings.load()
         User.objects.create_superuser('boss2', 'b@example.com', 'pw-boss2-1234')
         self.client.login(username='boss2', password='pw-boss2-1234')
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
 
     def test_unknown_section_is_a_404(self):
         response = self.client.get(reverse('restaurant:panel_list', args=['nonsense']))
@@ -878,7 +878,7 @@ class ControlPanelTests(TestCase):
     def test_a_section_lists_its_records(self):
         response = self.client.get(reverse('restaurant:panel_list', args=['categories']))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'مشاوي')
+        self.assertContains(response, 'ستربس')
 
     def test_search_narrows_a_section(self):
         Category.objects.create(name_ar='حلويات', name_en='Sweets')
@@ -886,7 +886,7 @@ class ControlPanelTests(TestCase):
             reverse('restaurant:panel_list', args=['categories']), {'q': 'حلويات'}
         )
         self.assertContains(response, 'حلويات')
-        self.assertNotContains(response, 'مشاوي')
+        self.assertNotContains(response, 'ستربس')
 
     def test_adding_a_record_saves_it(self):
         response = self.client.post(reverse('restaurant:panel_add', args=['offers']), {
@@ -901,23 +901,23 @@ class ControlPanelTests(TestCase):
     def test_editing_a_record_updates_it(self):
         response = self.client.post(
             reverse('restaurant:panel_edit', args=['categories', self.category.pk]),
-            {'name_ar': 'مشاوي شرقية', 'name_en': 'Grills', 'slug': 'grills',
-             'icon': 'skewer', 'image_url': '', 'display_order': 0, 'is_active': 'on'},
+            {'name_ar': 'ستربس حار', 'name_en': 'Stripes', 'slug': 'stripes',
+             'icon': 'chicken', 'image_url': '', 'display_order': 0, 'is_active': 'on'},
         )
         self.assertEqual(response.status_code, 302)
         self.category.refresh_from_db()
-        self.assertEqual(self.category.name_ar, 'مشاوي شرقية')
+        self.assertEqual(self.category.name_ar, 'ستربس حار')
 
     def test_an_invalid_form_redisplays_instead_of_saving(self):
         response = self.client.post(
             reverse('restaurant:panel_edit', args=['categories', self.category.pk]),
-            {'name_ar': '', 'name_en': '', 'slug': '', 'icon': 'skewer',
+            {'name_ar': '', 'name_en': '', 'slug': '', 'icon': 'fries',
              'image_url': '', 'display_order': 0},
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'راجع الحقول')
         self.category.refresh_from_db()
-        self.assertEqual(self.category.name_ar, 'مشاوي')
+        self.assertEqual(self.category.name_ar, 'ستربس')
 
     def test_toggling_a_boolean_flips_it(self):
         self.assertTrue(self.category.is_active)
@@ -976,18 +976,18 @@ class ControlPanelTests(TestCase):
                     data[name] = 'on'
             else:
                 data[name] = str(value)
-        data['name_ar'] = 'مطعم B12 الجديد'
+        data['name_ar'] = 'فرايز ستيشن الجديد'
 
         response = self.client.post(reverse('restaurant:panel_settings'), data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(RestaurantSettings.load().name_ar, 'مطعم B12 الجديد')
+        self.assertEqual(RestaurantSettings.load().name_ar, 'فرايز ستيشن الجديد')
 
 
 class ControlPanelPermissionTests(TestCase):
     def setUp(self):
         cache.clear()
         RestaurantSettings.load()
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.waiter = User.objects.create_user(
             'waiter2', password='pw-waiter2-1234', is_staff=True
         )
@@ -1001,7 +1001,7 @@ class ControlPanelPermissionTests(TestCase):
         self.waiter.user_permissions.add(Permission.objects.get(codename='view_category'))
         response = self.client.get(reverse('restaurant:panel_list', args=['categories']))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'مشاوي')
+        self.assertContains(response, 'ستربس')
         self.assertNotContains(response, 'btn-danger')
 
     def test_view_permission_alone_cannot_delete(self):
@@ -1027,7 +1027,7 @@ class CashierOrderTests(TestCase):
     def setUp(self):
         cache.clear()
         self.site = RestaurantSettings.load()
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.item = MenuItem.objects.create(
             category=self.category,
             name_ar='كباب',
@@ -1093,9 +1093,9 @@ class OrderPricingTests(TestCase):
     def setUp(self):
         cache.clear()
         site = RestaurantSettings.load()
-        site.whatsapp_number = '972597862389'
+        site.whatsapp_number = '970500000000'
         site.save()
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.kebab = MenuItem.objects.create(
             category=self.category, name_ar='كباب', name_en='Kebab', price='45.00',
         )
@@ -1218,7 +1218,7 @@ class OrderPricingTests(TestCase):
         data = response.json()
         self.assertIn(data['code'], data['message'])
         self.assertNotIn('90', data['message'])
-        self.assertTrue(data['whatsapp_url'].startswith('https://wa.me/972597862389'))
+        self.assertTrue(data['whatsapp_url'].startswith('https://wa.me/970500000000'))
 
     def test_the_link_sits_alone_so_whatsapp_makes_it_tappable(self):
         """A URL sharing a line with Arabic loses its boundaries to bidi."""
@@ -1299,7 +1299,7 @@ class OrderCodeTests(TestCase):
 
     def test_the_code_avoids_characters_that_are_misread_aloud(self):
         for _ in range(30):
-            body = Order.objects.create().code.removeprefix('B12-')
+            body = Order.objects.create().code.removeprefix(f'{Order.CODE_PREFIX}-')
             self.assertFalse(set(body) & set('IO01'))
 
 
@@ -1307,7 +1307,7 @@ class OrderPagesTests(TestCase):
     def setUp(self):
         cache.clear()
         RestaurantSettings.load()
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(
             category=category, name_ar='كباب', name_en='Kebab', price='45.00',
         )
@@ -1371,13 +1371,13 @@ class ArabicReceiptRenderingTests(TestCase):
         from .receipt import REGULAR, SEMIBOLD
 
         sample = (
-            'رقم الطلب الإجمالي كباب مشوي مشكل عصير ليمون بالنعناع بيتزا '
+            'رقم الطلب الإجمالي سماش برجر فرايز ستربس تشيروز عصير الموسم '
             'استلام من المطعم ديليفري الاسم الجوال العنوان ملاحظات '
             'صدرت هذه الفاتورة من موقع المطعم والأسعار محسوبة على الخادم '
             'للتأكد ابحث عن الرقم في لوحة المطعم يحدد عند التأكيد بدون بصل'
         )
         needed = {ord(character) for character in arabic_reshaper.reshape(sample)}
-        needed |= {ord(character) for character in 'B12-ACDEFGHJKLMNPQRSTUVWXYZ0123456789 ₪×·/:'}
+        needed |= {ord(character) for character in Order.CODE_PREFIX + '-ACDEFGHJKLMNPQRSTUVWXYZ0123456789 ₪×·/:'}
 
         for path in (REGULAR, SEMIBOLD):
             covered = set(TTFont(str(path)).getBestCmap().keys())
@@ -1391,7 +1391,7 @@ class OrderUrlPrivacyTests(TestCase):
     def setUp(self):
         cache.clear()
         RestaurantSettings.load()
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.item = MenuItem.objects.create(
             category=category, name_ar='كباب', name_en='Kebab', price='45.00',
         )

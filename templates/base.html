@@ -74,7 +74,7 @@
 <header class="site-header" id="top">
     <div class="page-shell header-inner">
         <a class="brand" href="{% if is_menu_page %}{% url 'restaurant:home' %}{% else %}#top{% endif %}" aria-label="{{ site.name_en }}">
-            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/b12-logo-clean.jpg' %}{% endif %}" alt="{{ site.name_en }}" width="890" height="810">
+            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/fries-station/branding/logo.webp' %}{% endif %}" alt="{{ site.name_en }}" width="512" height="512">
         </a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"

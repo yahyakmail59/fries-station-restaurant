@@ -118,9 +118,10 @@ svg { stroke-width: 1.8; }
 
 .header-inner { height: 100%; display: flex; align-items: center; gap: var(--space-6); direction: inherit; }
 
-.brand { flex: 0 0 142px; display: grid; place-items: center; align-self: stretch; }
-.brand img { width: 132px; height: 74px; object-fit: contain; object-position: center; }
-.site-header.scrolled .brand img { height: 62px; }
+/* The mark is a disc, so the header reserves a square rather than a band. */
+.brand { flex: 0 0 96px; display: grid; place-items: center; align-self: stretch; }
+.brand img { width: 72px; height: 72px; object-fit: contain; }
+.site-header.scrolled .brand img { width: 60px; height: 60px; }
 
 .main-nav { flex: 1; display: flex; justify-content: center; align-items: center; gap: var(--space-6); direction: inherit; }
 .main-nav a { position: relative; display: grid; gap: 1px; text-align: center; padding: 12px 2px; white-space: nowrap; }
@@ -477,6 +478,30 @@ html[dir="ltr"] .hero-ar { direction: rtl; text-align: right; font-family: var(-
 .menu-image img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: contrast(1.05) saturate(1.1); transition: transform var(--duration-slow) var(--ease-out); }
 .menu-card:hover .menu-image img { transform: scale(1.05); }
 .image-sheen { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 62%, rgba(34, 34, 34, .28)); pointer-events: none; }
+
+/* A dish whose only available picture was the logo is shown without one. The
+   slot keeps the card's height and says so, rather than leaving a grey hole
+   that reads as a broken image. */
+.menu-image-empty {
+    display: grid;
+    place-items: center;
+    background:
+        radial-gradient(circle, transparent 0 13px, rgba(215, 25, 32, .12) 13px 14px, transparent 15px),
+        var(--brand-soft);
+    background-size: 74px 74px, auto;
+}
+.menu-image-empty::after {
+    content: "الصورة قريبًا";
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    background: var(--surface-card);
+    color: var(--text-muted);
+    font-size: .7rem;
+    font-weight: var(--weight-bold);
+    box-shadow: var(--shadow-sm);
+}
+html[dir="ltr"] .menu-image-empty::after { content: "Photo coming soon"; }
+.menu-image-empty .image-sheen { display: none; }
 .dish-badge {
     position: absolute;
     top: 10px;
@@ -819,7 +844,7 @@ textarea { resize: vertical; }
 .footer-grid { display: grid; grid-template-columns: 1.35fr .7fr .7fr 1fr; gap: var(--space-6); direction: inherit; }
 .footer-grid.footer-grid-compact { grid-template-columns: 1.35fr .8fr 1fr; }
 .footer-grid > div { direction: inherit; }
-.footer-brand img { width: 150px; height: 104px; object-fit: contain; object-position: center; }
+.footer-brand img { width: 104px; height: 104px; object-fit: contain; background: #FFFFFF; border-radius: 50%; padding: 6px; }
 .footer-brand p { font-size: .7rem; color: rgba(255, 255, 255, .78); max-width: 240px; line-height: 1.8; }
 .footer-socials { display: flex; gap: var(--space-2); }
 .footer-socials a, .footer-socials button {
@@ -1289,8 +1314,8 @@ html[dir="ltr"] .review-arrow.next { right: -47px; left: auto; }
     .site-header { height: 72px; }
     .site-header.scrolled { height: 68px; }
     .header-inner { gap: 10px; }
-    .brand { flex-basis: 92px; }
-    .brand img { width: 92px; height: 58px; }
+    .brand { flex-basis: 64px; }
+    .brand img { width: 56px; height: 56px; }
     .nav-toggle { display: grid; margin-inline-start: auto; }
     .main-nav {
         position: fixed;

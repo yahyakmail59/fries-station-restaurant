@@ -45,14 +45,14 @@ class TimeStampedModel(models.Model):
 
 
 class RestaurantSettings(TimeStampedModel):
-    name_ar = models.CharField(max_length=120, default='مطعم B12', verbose_name='اسم المطعم بالعربية')
-    name_en = models.CharField(max_length=120, default='B12 Restaurant', verbose_name='اسم المطعم بالإنجليزية')
-    tagline_ar = models.CharField(max_length=160, default='الطعم حكاية', verbose_name='الشعار النصي بالعربية')
-    tagline_en = models.CharField(max_length=160, default='Taste Tells a Story', verbose_name='الشعار النصي بالإنجليزية')
-    hero_title_ar = models.CharField(max_length=180, default='الطعم حكاية', verbose_name='عنوان الواجهة بالعربية')
-    hero_title_en = models.CharField(max_length=180, default='Taste Tells a Story', verbose_name='عنوان الواجهة بالإنجليزية')
-    hero_text_ar = models.TextField(default='رحلة من النكهات الشرقية والعالمية محضّرة بأجود المكونات وبلمسة استثنائية.', verbose_name='وصف الواجهة بالعربية')
-    hero_text_en = models.TextField(default='A journey of global and oriental flavours crafted with premium ingredients and passion.', verbose_name='وصف الواجهة بالإنجليزية')
+    name_ar = models.CharField(max_length=120, default='فرايز ستيشن', verbose_name='اسم المطعم بالعربية')
+    name_en = models.CharField(max_length=120, default='Fries Station', verbose_name='اسم المطعم بالإنجليزية')
+    tagline_ar = models.CharField(max_length=160, default='مقرمشة. ذهبية. مثالية.', verbose_name='الشعار النصي بالعربية')
+    tagline_en = models.CharField(max_length=160, default='Crispy. Golden. Perfect.', verbose_name='الشعار النصي بالإنجليزية')
+    hero_title_ar = models.CharField(max_length=180, default='مقرمشة. ذهبية. مثالية.', verbose_name='عنوان الواجهة بالعربية')
+    hero_title_en = models.CharField(max_length=180, default='Crispy. Golden. Perfect.', verbose_name='عنوان الواجهة بالإنجليزية')
+    hero_text_ar = models.TextField(default='بطاطا مقرمشة ودجاج مقلي طازج، مع صوصاتنا الخاصة. سريع، طازج، ولذيذ.', verbose_name='وصف الواجهة بالعربية')
+    hero_text_en = models.TextField(default='Crispy fries and freshly fried chicken, with our own sauces. Fast, fresh and delicious.', verbose_name='وصف الواجهة بالإنجليزية')
     logo = models.ImageField(upload_to='branding/', blank=True, verbose_name='الشعار')
     hero_image = models.ImageField(upload_to='branding/', blank=True, verbose_name='صورة الواجهة')
     hero_image_url = models.CharField(
@@ -77,19 +77,19 @@ class RestaurantSettings(TimeStampedModel):
     about_title_ar = models.CharField(max_length=160, default='من نحن', verbose_name='عنوان من نحن بالعربية')
     about_title_en = models.CharField(max_length=160, default='About Us', verbose_name='عنوان من نحن بالإنجليزية')
     about_text_ar = models.TextField(
-        default='وُلد مطعم B12 من شغف حقيقي بالطعم الأصيل. نجمع بين المشاوي الشرقية والأطباق العالمية في مكان واحد، ونحضّر كل طبق يوميًا بمكونات طازجة مختارة بعناية، لنقدم لكم تجربة تستحق التكرار.',
+        default='فرايز ستيشن مكان واحد للبطاطا المقرمشة والدجاج المقلي. نقلي الطلب عند طلبه، ونصنع صوصاتنا بأنفسنا، ونقدّمها بسرعة وبنفس الجودة في كل مرة.',
         verbose_name='نص من نحن بالعربية',
     )
     about_text_en = models.TextField(
-        default='B12 was born from a real passion for authentic flavour. We bring oriental grills and international dishes together under one roof, preparing every dish daily with carefully selected fresh ingredients.',
+        default='Fries Station is one place for crispy fries and fried chicken. Everything is fried to order, the sauces are our own, and the quality is the same every time.',
         verbose_name='نص من نحن بالإنجليزية',
     )
 
     menu_title_ar = models.CharField(max_length=160, default='استكشف أقسام القائمة', verbose_name='عنوان أقسام القائمة بالعربية')
     menu_title_en = models.CharField(max_length=160, default='Explore Our Menu', verbose_name='عنوان أقسام القائمة بالإنجليزية')
-    featured_title_ar = models.CharField(max_length=160, default='أطباق مميزة', verbose_name='عنوان الأطباق المميزة بالعربية')
+    featured_title_ar = models.CharField(max_length=160, default='الأصناف المميزة', verbose_name='عنوان الأطباق المميزة بالعربية')
     featured_title_en = models.CharField(max_length=160, default='Featured Menu', verbose_name='عنوان الأطباق المميزة بالإنجليزية')
-    offers_title_ar = models.CharField(max_length=160, default='عروض وأطباق مميزة', verbose_name='عنوان العروض بالعربية')
+    offers_title_ar = models.CharField(max_length=160, default='العروض', verbose_name='عنوان العروض بالعربية')
     offers_title_en = models.CharField(max_length=160, default='Special Offers', verbose_name='عنوان العروض بالإنجليزية')
     services_title_ar = models.CharField(max_length=160, default='خدماتنا', verbose_name='عنوان الخدمات بالعربية')
     services_title_en = models.CharField(max_length=160, default='Our Services', verbose_name='عنوان الخدمات بالإنجليزية')
@@ -115,16 +115,16 @@ class RestaurantSettings(TimeStampedModel):
     seo_title_en = models.CharField(max_length=180, blank=True, verbose_name='عنوان SEO بالإنجليزية')
     seo_description_ar = models.TextField(blank=True, verbose_name='وصف SEO بالعربية')
     seo_description_en = models.TextField(blank=True, verbose_name='وصف SEO بالإنجليزية')
-    footer_text_ar = models.CharField(max_length=255, default='رحلة من النكهات العالمية والشرقية الأصلية.', verbose_name='وصف التذييل بالعربية')
-    footer_text_en = models.CharField(max_length=255, default='A journey of authentic global and oriental flavours.', verbose_name='وصف التذييل بالإنجليزية')
+    footer_text_ar = models.CharField(max_length=255, default='بطاطا مقرمشة ودجاج مقلي، تُقلى عند الطلب.', verbose_name='وصف التذييل بالعربية')
+    footer_text_en = models.CharField(max_length=255, default='Crispy fries and fried chicken, cooked to order.', verbose_name='وصف التذييل بالإنجليزية')
 
-    whatsapp_number = models.CharField(max_length=30, default='972597862389', help_text='أرقام فقط مع رمز الدولة، مثال: 972597862389', verbose_name='رقم واتساب')
-    phone = models.CharField(max_length=40, default='+972 59 786 2389', verbose_name='رقم الهاتف')
+    whatsapp_number = models.CharField(max_length=30, blank=True, help_text='أرقام فقط مع رمز الدولة، مثال: 972590000000. الطلب والحجز لا يعملان بدونه.', verbose_name='رقم واتساب')
+    phone = models.CharField(max_length=40, blank=True, verbose_name='رقم الهاتف')
     email = models.EmailField(blank=True, verbose_name='البريد الإلكتروني')
-    address_ar = models.CharField(max_length=255, default='غرب غزة - دوار حيدر', verbose_name='العنوان بالعربية')
-    address_en = models.CharField(max_length=255, default='West Gaza - Haidar Roundabout', verbose_name='العنوان بالإنجليزية')
-    hours_ar = models.CharField(max_length=160, default='يوميًا من 8 صباحًا حتى 2 صباحًا', verbose_name='ساعات العمل بالعربية')
-    hours_en = models.CharField(max_length=160, default='Daily, 8:00 AM - 2:00 AM', verbose_name='ساعات العمل بالإنجليزية')
+    address_ar = models.CharField(max_length=255, blank=True, verbose_name='العنوان بالعربية')
+    address_en = models.CharField(max_length=255, blank=True, verbose_name='العنوان بالإنجليزية')
+    hours_ar = models.CharField(max_length=160, default='يوميًا من 11:30 صباحًا حتى 11:30 مساءً', verbose_name='ساعات العمل بالعربية')
+    hours_en = models.CharField(max_length=160, default='Daily, 11:30 AM - 11:30 PM', verbose_name='ساعات العمل بالإنجليزية')
     currency = models.CharField(max_length=20, default='₪', verbose_name='رمز العملة')
     instagram_url = models.URLField(blank=True, verbose_name='رابط إنستغرام')
     facebook_url = models.URLField(blank=True, verbose_name='رابط فيسبوك')
@@ -252,14 +252,15 @@ class HeroStat(TimeStampedModel):
 
 class Category(TimeStampedModel):
     ICON_CHOICES = [
-        ('skewer', 'شرقي / مشاوي'),
-        ('burger', 'غربي / برجر'),
-        ('pasta', 'إيطالي / باستا'),
-        ('pizza', 'بيتزا'),
-        ('drink', 'مشروبات'),
-        ('dessert', 'حلويات'),
-        ('fish', 'بحريات'),
+        ('fries', 'فرايز'),
+        ('chicken', 'دجاج وستربس'),
+        ('burger', 'برجر وساندويتش'),
+        ('kids', 'وجبات أطفال'),
+        ('sauce', 'صوصات'),
         ('salad', 'سلطات'),
+        ('dessert', 'حلويات'),
+        ('drink', 'مشروبات'),
+        ('seafood', 'بحريات'),
     ]
     name_ar = models.CharField(max_length=100, verbose_name='الاسم بالعربية')
     name_en = models.CharField(max_length=100, verbose_name='الاسم بالإنجليزية')
@@ -299,15 +300,24 @@ class Category(TimeStampedModel):
 
     @property
     def lucide_icon(self):
+        # The bundled Lucide subset has no chip-and-fries glyph, so the hottest
+        # thing it does have carries the fries section.
         return {
-            'skewer': 'flame',
+            'fries': 'flame',
+            'chicken': 'utensils',
             'burger': 'sandwich',
+            'kids': 'star',
+            'sauce': 'soup',
+            'salad': 'salad',
+            'dessert': 'cake-slice',
+            'drink': 'cup-soda',
+            'seafood': 'fish',
+            # Keys inherited from the reference project, kept so an existing
+            # row never renders without an icon.
+            'skewer': 'flame',
             'pasta': 'soup',
             'pizza': 'pizza',
-            'drink': 'cup-soda',
-            'dessert': 'cake-slice',
             'fish': 'fish',
-            'salad': 'salad',
         }.get(self.icon, 'utensils')
 
     def __str__(self):
@@ -542,6 +552,7 @@ class Order(TimeStampedModel):
     # No I, O, 0 or 1: the code gets read aloud over the phone.
     CODE_ALPHABET = 'ACDEFGHJKLMNPQRSTUVWXYZ23456789'
     CODE_LENGTH = 4
+    CODE_PREFIX = 'FS'
 
     code = models.CharField(max_length=16, unique=True, editable=False, verbose_name='رقم الطلب')
     # The code is short so it can be read aloud, which also makes it easy to
@@ -611,11 +622,11 @@ class Order(TimeStampedModel):
 
         for _ in range(20):
             body = ''.join(secrets.choice(cls.CODE_ALPHABET) for _ in range(cls.CODE_LENGTH))
-            candidate = f'B12-{body}'
+            candidate = f'{cls.CODE_PREFIX}-{body}'
             if not cls.objects.filter(code=candidate).exists():
                 return candidate
         # Astronomically unlikely; fall back to a longer code rather than fail.
-        return f'B12-{secrets.token_hex(4).upper()}'
+        return f'{cls.CODE_PREFIX}-{secrets.token_hex(4).upper()}'
 
     @property
     def item_count(self):

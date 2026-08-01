@@ -69,7 +69,7 @@
         <div class="menu-grid menu-page-grid" id="menu-grid" data-page-size="6">
             {% for item in menu_items %}
             <article class="menu-card reveal" data-category="{{ item.category.slug }}" data-search="{{ item.name_ar }} {{ item.name_en }} {{ item.description_ar }} {{ item.description_en }}">
-                <div class="menu-image">
+                <div class="menu-image{% if not item.image_src %} menu-image-empty{% endif %}">
                     {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
                     {% if language == 'ar' and item.badge_ar %}<span class="dish-badge">{{ item.badge_ar }}</span>{% elif language == 'en' and item.badge_en %}<span class="dish-badge">{{ item.badge_en }}</span>{% endif %}
                     <span class="image-sheen"></span>
