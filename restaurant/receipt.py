@@ -32,15 +32,17 @@ PAD = 30
 CARD = 22          # inset of the white panels from the page edge
 INNER = CARD + 18  # text inset inside a panel
 
-PAPER = '#f4f1ec'
+PAPER = '#f2f0ee'
 PANEL = '#ffffff'
-BRAND = '#7d0a11'      # B12 red, deepened so white text on it passes contrast
-BRAND_SOFT = '#fbeceb'
-INK = '#1b1b1b'
-MUTED = '#5f5a55'
-FAINT = '#8a837c'
-RULE = '#e7e1d9'
-GOLD = '#8a6d14'
+BRAND = '#8c1518'      # the brand's deep red; white on it is 9.39:1
+BRAND_SOFT = '#fbe9ea'
+INK = '#222222'
+MUTED = '#555555'
+FAINT = '#7a736f'
+RULE = '#e4e0dd'
+# The brand yellow cannot be read on paper at this size, so amounts that are
+# still to be confirmed use it darkened to 4.9:1 instead.
+GOLD = '#8a6a00'
 
 
 @lru_cache(maxsize=24)
@@ -167,7 +169,7 @@ def render_order(order):
         [(CARD, 16), (WIDTH - CARD, 138)], radius=18, fill=BRAND,
     )
     sheet.y = 44
-    sheet.rtl(order.restaurant_name or 'B12', size=30, bold=True, fill='#ffffff')
+    sheet.rtl(order.restaurant_name or 'فرايز ستيشن', size=30, bold=True, fill='#ffffff')
     sheet.y = 86
     sheet.rtl('تأكيد الطلب', size=17, fill='#f0c9c7')
     # A white disc with the tick drawn back in the brand colour.
@@ -287,7 +289,7 @@ def render_order(order):
     sheet.y += 28
     sheet.centre(f'يرجى الاحتفاظ برقم الطلب {order.code} عند الاستفسار', size=13, fill=MUTED)
     sheet.y += 24
-    sheet.centre(f'شكرًا لطلبكم من {order.restaurant_name or "B12"}', size=13, fill=BRAND)
+    sheet.centre(f'شكرًا لطلبكم من {order.restaurant_name or "فرايز ستيشن"}', size=13, fill=BRAND)
     sheet.y += 30
 
     buffer = BytesIO()

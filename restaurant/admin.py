@@ -60,8 +60,8 @@ class RestaurantSettingsAdminForm(forms.ModelForm):
         return cleaned
 
 
-admin.site.site_header = 'B12 Restaurant — لوحة الإدارة'
-admin.site.site_title = 'B12 Admin'
+admin.site.site_header = 'فرايز ستيشن — لوحة الإدارة'
+admin.site.site_title = 'Fries Station Admin'
 admin.site.index_title = 'إدارة الموقع والمحتوى والطلبات'
 
 
@@ -72,7 +72,7 @@ class ImagePreviewMixin:
         if not src:
             return '—'
         return format_html(
-            '<img src="{}" style="width:74px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #444" alt="">',
+            '<img src="{}" style="width:74px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #d3cfcc" alt="">',
             src,
         )
 

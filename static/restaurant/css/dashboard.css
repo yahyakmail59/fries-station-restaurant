@@ -1,37 +1,45 @@
-/* B12 customer desk.
+/* Fries Station operations desk.
 
-   Layout: lavender canvas → deep-purple rounded sidebar + cream content
-   panel. Every colour is a semantic token so one rule set serves the light
-   and dark themes, and the theme choice is shared with the Django admin. */
+   Layout: neutral canvas → deep-red rounded sidebar + white content panel.
+   Every colour is a semantic token so one rule set serves the light and dark
+   themes, and the theme choice is shared with the Django admin.
+
+   This is a working surface, not a storefront: no patterns, no gradients
+   behind data, and the brand shows only in the sidebar, the accents and the
+   status colours. Numbers have to be readable at a glance during service.
+
+   The token names below are kept from the layout they describe. Only the
+   values are the brand's. */
 
 :root {
     color-scheme: light;
 
-    --canvas: #e9dbfb;        /* page behind the panel */
-    --panel: #fffdf9;         /* the big content panel */
-    --surface: #ffffff;       /* cards and rows */
-    --surface-sunk: #f5f0fb;
-    --ink: #1f1435;
-    --muted: #574d6b;
-    --faint: #6f6688;
-    --line: #ece5f6;
-    --line-strong: #ddd2ee;
+    --canvas: #EDEAE8;        /* page behind the panel */
+    --panel: #FFFFFF;         /* the big content panel */
+    --surface: #FFFFFF;       /* cards and rows */
+    --surface-sunk: #F5F5F5;
+    --ink: #222222;
+    --muted: #555555;
+    --faint: #6B6B6B;
+    --line: #E6E3E1;
+    --line-strong: #D3CFCC;
 
-    --purple: #6d22d6;        /* sidebar */
-    --purple-deep: #5716b4;
-    --purple-soft: #f0e6fd;
-    --purple-ink: #6d22d6;   /* purple used as text, not as a surface */
-    --blue: #2d2fd8;
-    --blue-soft: #e6e7fc;
-    --pink: #c30f7c;
-    --pink-soft: #fce6f3;
-    --wa: #0f7a3d;
-    --wa-soft: #e6f4ea;
+    --purple: #8C1518;        /* sidebar */
+    --purple-deep: #6E1013;
+    --purple-soft: #FBE9EA;
+    --purple-ink: #8C1518;    /* the deep red used as text, not as a surface */
+    --blue: #0B5FA5;
+    --blue-soft: #E8F1FA;
+    --pink: #B3121B;          /* urgency: needs a reply, has lapsed */
+    --pink-soft: #FCEAEA;
+    --wa: #0F7A3D;
+    --wa-soft: #E6F4EA;
 
-    --rhythm-0: #ece5f6;
-    --rhythm-1: #d5c3f0;
-    --rhythm-2: #a274e6;
-    --rhythm-3: #6d22d6;
+    /* Visit intensity reads as heat, cold grey through to the brand red. */
+    --rhythm-0: #E6E3E1;
+    --rhythm-1: #FFE082;
+    --rhythm-2: #FFB300;
+    --rhythm-3: #D71920;
 
     --arabic: "Cairo", sans-serif;
 
@@ -39,7 +47,7 @@
     --r-lg: 20px;
     --r-xl: 28px;
     --gap: 18px;
-    --shadow: 0 2px 10px rgba(56, 25, 105, .05);
+    --shadow: 0 2px 10px rgba(34, 25, 22, .07);
     --sidebar-w: 224px;
 }
 
@@ -47,31 +55,31 @@
     :root:not([data-theme="light"]) {
         color-scheme: dark;
 
-        --canvas: #140f22;
-        --panel: #1c1630;
-        --surface: #241d3d;
-        --surface-sunk: #2b2348;
-        --ink: #f1ecfb;
-        --muted: #b0a6cc;
-        --faint: #9a90b8;
-        --line: #322a4f;
-        --line-strong: #40365f;
+        --canvas: #16110F;
+        --panel: #1E1917;
+        --surface: #262020;
+        --surface-sunk: #2E2726;
+        --ink: #F3EFED;
+        --muted: #B9AFAC;
+        --faint: #9E9491;
+        --line: #362E2D;
+        --line-strong: #463C3A;
 
-        --purple: #5a1cb0;
-        --purple-deep: #4a1594;
-        --purple-soft: #2e2350;
-        --purple-ink: #b794fa;
-        --blue: #8b8cf8;
-        --blue-soft: #262a52;
-        --pink: #f472b6;
-        --pink-soft: #40203a;
-        --wa: #5fca8a;
-        --wa-soft: #16301f;
+        --purple: #6E1013;
+        --purple-deep: #58090C;
+        --purple-soft: #3A1D1E;
+        --purple-ink: #FF9A9E;
+        --blue: #7FB6E8;
+        --blue-soft: #1B2B3A;
+        --pink: #FF8A80;
+        --pink-soft: #3A1D1E;
+        --wa: #5FCA8A;
+        --wa-soft: #16301F;
 
-        --rhythm-0: #2f2750;
-        --rhythm-1: #48376f;
-        --rhythm-2: #7c4fd0;
-        --rhythm-3: #a97dfa;
+        --rhythm-0: #322B2A;
+        --rhythm-1: #6B5518;
+        --rhythm-2: #C08A12;
+        --rhythm-3: #FF5A5F;
 
         --shadow: none;
     }
@@ -81,31 +89,31 @@
 :root[data-theme="dark"] {
     color-scheme: dark;
 
-    --canvas: #140f22;
-    --panel: #1c1630;
-    --surface: #241d3d;
-    --surface-sunk: #2b2348;
-    --ink: #f1ecfb;
-    --muted: #b0a6cc;
-    --faint: #9a90b8;
-    --line: #322a4f;
-    --line-strong: #40365f;
+    --canvas: #16110F;
+    --panel: #1E1917;
+    --surface: #262020;
+    --surface-sunk: #2E2726;
+    --ink: #F3EFED;
+    --muted: #B9AFAC;
+    --faint: #9E9491;
+    --line: #362E2D;
+    --line-strong: #463C3A;
 
-    --purple: #5a1cb0;
-    --purple-deep: #4a1594;
-    --purple-soft: #2e2350;
-    --purple-ink: #b794fa;
-    --blue: #8b8cf8;
-    --blue-soft: #262a52;
-    --pink: #f472b6;
-    --pink-soft: #40203a;
-    --wa: #5fca8a;
-    --wa-soft: #16301f;
+    --purple: #6E1013;
+    --purple-deep: #58090C;
+    --purple-soft: #3A1D1E;
+    --purple-ink: #FF9A9E;
+    --blue: #7FB6E8;
+    --blue-soft: #1B2B3A;
+    --pink: #FF8A80;
+    --pink-soft: #3A1D1E;
+    --wa: #5FCA8A;
+    --wa-soft: #16301F;
 
-    --rhythm-0: #2f2750;
-    --rhythm-1: #48376f;
-    --rhythm-2: #7c4fd0;
-    --rhythm-3: #a97dfa;
+    --rhythm-0: #322B2A;
+    --rhythm-1: #6B5518;
+    --rhythm-2: #C08A12;
+    --rhythm-3: #FF5A5F;
 
     --shadow: none;
 }
@@ -172,15 +180,17 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round
     color: #fff;
 }
 
-/* The logo art is red on black, so a black tile lets it sit on the purple
-   without a pale rectangle around it. */
-.logo { display: block; border-radius: 16px; overflow: hidden; background: #000; }
-.logo img { width: 100%; height: auto; aspect-ratio: 890 / 810; object-fit: contain; }
+/* The mark is a red disc, so it needs a light tile to read against the deep
+   red sidebar rather than sinking into it. */
+.logo { display: block; border-radius: 16px; overflow: hidden; background: #FFFFFF; padding: 8px; }
+.logo img { width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; }
 
+/* White at 55% over the sidebar red measures 3.73:1, which is under the
+   threshold for text this small. The brand's soft yellow carries it instead. */
 .nav-group {
     margin: 14px 0 4px; padding-inline: 13px;
     font-size: .68rem; font-weight: 700; letter-spacing: .08em;
-    color: rgba(255, 255, 255, .55); text-transform: none;
+    color: #FFE082; text-transform: none;
 }
 .side-nav > .nav-group:first-child { margin-top: 8px; }
 
@@ -720,7 +730,8 @@ table.data td.row-end { display: flex; gap: 6px; justify-content: flex-end; }
 .quantity-control {
     grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: 36px minmax(48px, 1fr) 36px;
+    /* 44px: the cashier taps these on a tablet, mid-service, at speed. */
+    grid-template-columns: 44px minmax(48px, 1fr) 44px;
     direction: ltr;
     border: 1px solid var(--line-strong);
     border-radius: 999px;
@@ -737,7 +748,7 @@ table.data td.row-end { display: flex; gap: 6px; justify-content: flex-end; }
 .quantity-control input {
     min-width: 0;
     width: 100%;
-    height: 36px;
+    height: 44px;
     border: 0;
     border-inline: 1px solid var(--line);
     background: var(--surface);
@@ -761,7 +772,7 @@ table.data td.row-end { display: flex; gap: 6px; justify-content: flex-end; }
     border: 1px solid var(--line-strong);
     border-radius: var(--r-lg);
     background: color-mix(in srgb, var(--surface) 94%, transparent);
-    box-shadow: 0 12px 32px rgba(40, 19, 77, .16);
+    box-shadow: 0 12px 32px rgba(34, 25, 22, .18);
     backdrop-filter: blur(12px);
 }
 .cashier-submit > div { display: grid; line-height: 1.3; }

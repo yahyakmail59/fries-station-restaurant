@@ -6,8 +6,8 @@ from django.contrib import admin
 from django.views.static import serve
 from django.urls import include, path
 
-admin.site.site_header = 'B12 Restaurant — الإدارة'
-admin.site.site_title = 'B12 Admin'
+admin.site.site_header = 'فرايز ستيشن — الإدارة'
+admin.site.site_title = 'Fries Station Admin'
 admin.site.index_title = 'إدارة محتوى الموقع والطلبات'
 
 urlpatterns = [

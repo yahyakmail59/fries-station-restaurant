@@ -3,7 +3,7 @@
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
-{# Loaded after the admin's own stylesheets so the B12 variables win. #}
+{# Loaded after the admin's own stylesheets so the brand variables win. #}
 {% block extrastyle %}{{ block.super }}
 <link rel="stylesheet" href="{% static 'restaurant/css/admin.css' %}">
 {% endblock %}

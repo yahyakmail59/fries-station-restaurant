@@ -1,32 +1,35 @@
-/* B12 skin for the Django admin.
+/* Fries Station skin for the Django admin.
 
    Django's admin is built entirely on CSS custom properties and already
    handles RTL and dark mode, so this file re-points those variables at the
-   same calm palette the customer dashboard uses, then adds a thin layer of
+   same calm palette the operations desk uses, then adds a thin layer of
    modern shaping (softer corners, quieter borders, roomier controls).
-   No admin markup is replaced, so Django upgrades stay safe. */
+   No admin markup is replaced, so Django upgrades stay safe.
+
+   The brand appears in the header band, the accents and the buttons. The
+   working area stays neutral: this screen is read under time pressure. */
 
 @import url("https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;500;600;700&display=swap");
 
 html[data-theme="light"], :root {
-    --b12-canvas: #f6f3ed;
-    --b12-surface: #ffffff;
-    --b12-sunk: #f1ede5;
-    --b12-ink: #241f1b;
-    --b12-muted: #5c544b;
-    --b12-faint: #74695f;
-    --b12-line: #e4ded3;
-    --b12-line-strong: #d2cabc;
-    --b12-accent: #c0121d;
-    --b12-accent-soft: #fbeaea;
-    --b12-gold: #7d6212;
-    --b12-wa: #0f7a3d;
+    --b12-canvas: #F1EEEC;
+    --b12-surface: #FFFFFF;
+    --b12-sunk: #F5F5F5;
+    --b12-ink: #222222;
+    --b12-muted: #555555;
+    --b12-faint: #6B6B6B;
+    --b12-line: #E6E3E1;
+    --b12-line-strong: #D3CFCC;
+    --b12-accent: #B3121B;
+    --b12-accent-soft: #FCEAEA;
+    --b12-gold: #8A6A00;   /* the brand yellow darkened until it can be text */
+    --b12-wa: #0F7A3D;
 
     /* Django admin variables, re-pointed */
-    --primary: #2f2a24;
-    --secondary: #2f2a24;
+    --primary: #8C1518;
+    --secondary: #8C1518;
     --accent: var(--b12-gold);
-    --primary-fg: #f6f3ed;
+    --primary-fg: #FFFFFF;
 
     --body-fg: var(--b12-ink);
     --body-bg: var(--b12-canvas);
@@ -34,44 +37,44 @@ html[data-theme="light"], :root {
     --body-medium-color: var(--b12-muted);
     --body-loud-color: var(--b12-ink);
 
-    --header-color: #e8e1d4;
-    --header-branding-color: #ffffff;
-    --header-bg: #2f2a24;
-    --header-link-color: #ffffff;
+    --header-color: #FFE082;
+    --header-branding-color: #FFFFFF;
+    --header-bg: #8C1518;
+    --header-link-color: #FFFFFF;
 
     --breadcrumbs-fg: var(--b12-muted);
     --breadcrumbs-link-fg: var(--b12-ink);
     --breadcrumbs-bg: var(--b12-sunk);
 
-    --link-fg: #8a4a12;
-    --link-hover-color: var(--b12-accent);
-    --link-selected-fg: var(--b12-accent);
+    --link-fg: #B3121B;
+    --link-hover-color: #8C1518;
+    --link-selected-fg: #8C1518;
 
     --hairline-color: var(--b12-line);
     --border-color: var(--b12-line-strong);
 
     --error-fg: var(--b12-accent);
 
-    --message-success-bg: #e6f4ea;
-    --message-warning-bg: #f7f0dc;
+    --message-success-bg: #E7F4EB;
+    --message-warning-bg: #FDF3E0;
     --message-error-bg: var(--b12-accent-soft);
 
     --darkened-bg: var(--b12-sunk);
     --selected-bg: var(--b12-sunk);
-    --selected-row: #f7f0dc;
+    --selected-row: #FFF6DB;
 
-    --button-fg: #f6f3ed;
-    --button-bg: #3c352c;
-    --button-hover-bg: #241f1b;
-    --default-button-bg: var(--b12-accent);
-    --default-button-hover-bg: #9c0e17;
-    --close-button-bg: #8b8177;
+    --button-fg: #FFFFFF;
+    --button-bg: #4A4340;
+    --button-hover-bg: #222222;
+    --default-button-bg: #D71920;
+    --default-button-hover-bg: #8C1518;
+    --close-button-bg: #857C79;
     --close-button-hover-bg: var(--b12-ink);
     --delete-button-bg: var(--b12-accent);
-    --delete-button-hover-bg: #9c0e17;
+    --delete-button-hover-bg: #8C1518;
 
-    --object-tools-fg: #f6f3ed;
-    --object-tools-bg: #3c352c;
+    --object-tools-fg: #FFFFFF;
+    --object-tools-bg: #4A4340;
     --object-tools-hover-bg: var(--b12-ink);
 
     --font-family-primary: "Cairo", system-ui, sans-serif;
@@ -79,74 +82,74 @@ html[data-theme="light"], :root {
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --b12-canvas: #14120f;
-        --b12-surface: #1d1a16;
-        --b12-sunk: #232019;
-        --b12-ink: #f0eae0;
-        --b12-muted: #a79d8f;
-        --b12-faint: #8f8677;
-        --b12-line: #2e2a23;
-        --b12-line-strong: #3d382f;
-        --b12-accent: #f0736f;
-        --b12-accent-soft: #3a1e1c;
-        --b12-gold: #d9b44a;
-        --b12-wa: #5fca8a;
+        --b12-canvas: #16110F;
+        --b12-surface: #1E1917;
+        --b12-sunk: #262020;
+        --b12-ink: #F3EFED;
+        --b12-muted: #B9AFAC;
+        --b12-faint: #9E9491;
+        --b12-line: #362E2D;
+        --b12-line-strong: #463C3A;
+        --b12-accent: #FF8A80;
+        --b12-accent-soft: #3A1D1E;
+        --b12-gold: #FFC107;
+        --b12-wa: #5FCA8A;
 
-        --primary: #2a251e;
-        --secondary: #2a251e;
-        --primary-fg: #f0eae0;
-        --header-bg: #1d1a16;
-        --header-color: #a79d8f;
-        --header-branding-color: #f0eae0;
-        --breadcrumbs-bg: #1d1a16;
-        --breadcrumbs-fg: #a79d8f;
-        --breadcrumbs-link-fg: #f0eae0;
-        --link-fg: #e0b878;
+        --primary: #6E1013;
+        --secondary: #6E1013;
+        --primary-fg: #F3EFED;
+        --header-bg: #6E1013;
+        --header-color: #FFE082;
+        --header-branding-color: #FFFFFF;
+        --breadcrumbs-bg: #1E1917;
+        --breadcrumbs-fg: #B9AFAC;
+        --breadcrumbs-link-fg: #F3EFED;
+        --link-fg: #FF9A9E;
         --link-hover-color: var(--b12-gold);
         --link-selected-fg: var(--b12-gold);
-        --message-success-bg: #16301f;
-        --message-warning-bg: #362d17;
-        --message-error-bg: #3a1e1c;
-        --selected-row: #362d17;
-        --button-bg: #3d382f;
-        --button-hover-bg: #4c4539;
-        --close-button-bg: #3d382f;
+        --message-success-bg: #16301F;
+        --message-warning-bg: #3A2E14;
+        --message-error-bg: #3A1D1E;
+        --selected-row: #3A2E14;
+        --button-bg: #463C3A;
+        --button-hover-bg: #574B48;
+        --close-button-bg: #463C3A;
     }
 }
 
 html[data-theme="dark"] {
-    --b12-canvas: #14120f;
-    --b12-surface: #1d1a16;
-    --b12-sunk: #232019;
-    --b12-ink: #f0eae0;
-    --b12-muted: #a79d8f;
-    --b12-faint: #8f8677;
-    --b12-line: #2e2a23;
-    --b12-line-strong: #3d382f;
-    --b12-accent: #f0736f;
-    --b12-accent-soft: #3a1e1c;
-    --b12-gold: #d9b44a;
-    --b12-wa: #5fca8a;
+    --b12-canvas: #16110F;
+    --b12-surface: #1E1917;
+    --b12-sunk: #262020;
+    --b12-ink: #F3EFED;
+    --b12-muted: #B9AFAC;
+    --b12-faint: #9E9491;
+    --b12-line: #362E2D;
+    --b12-line-strong: #463C3A;
+    --b12-accent: #FF8A80;
+    --b12-accent-soft: #3A1D1E;
+    --b12-gold: #FFC107;
+    --b12-wa: #5FCA8A;
 
-    --primary: #2a251e;
-    --secondary: #2a251e;
-    --primary-fg: #f0eae0;
-    --header-bg: #1d1a16;
-    --header-color: #a79d8f;
-    --header-branding-color: #f0eae0;
-    --breadcrumbs-bg: #1d1a16;
-    --breadcrumbs-fg: #a79d8f;
-    --breadcrumbs-link-fg: #f0eae0;
-    --link-fg: #e0b878;
+    --primary: #6E1013;
+    --secondary: #6E1013;
+    --primary-fg: #F3EFED;
+    --header-bg: #1E1917;
+    --header-color: #FFE082;
+    --header-branding-color: #FFFFFF;
+    --breadcrumbs-bg: #1E1917;
+    --breadcrumbs-fg: #B9AFAC;
+    --breadcrumbs-link-fg: #F3EFED;
+    --link-fg: #FF9A9E;
     --link-hover-color: var(--b12-gold);
     --link-selected-fg: var(--b12-gold);
-    --message-success-bg: #16301f;
-    --message-warning-bg: #362d17;
-    --message-error-bg: #3a1e1c;
-    --selected-row: #362d17;
-    --button-bg: #3d382f;
-    --button-hover-bg: #4c4539;
-    --close-button-bg: #3d382f;
+    --message-success-bg: #16301F;
+    --message-warning-bg: #3A2E14;
+    --message-error-bg: #3A1D1E;
+    --selected-row: #3A2E14;
+    --button-bg: #463C3A;
+    --button-hover-bg: #574B48;
+    --close-button-bg: #463C3A;
 }
 
 /* ── Shaping ───────────────────────────────────────────────────────────── */
@@ -250,20 +253,28 @@ ul.messagelist li { border-radius: 10px; padding: 11px 16px 11px 44px; font-weig
 .help, p.help, div.help, .helptext { color: var(--b12-faint); font-size: .78rem; }
 
 /* Link back to the customer dashboard, shown in the admin header. */
+/* Sits inside #header, where Django styles `#header a:link` — two ids beat a
+   single class, so the colour has to be stated at that weight or the link
+   inherits white and lands at 1.63:1 on the yellow. */
+#header .b12-desk-link:link,
+#header .b12-desk-link:visited,
 .b12-desk-link {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     margin-inline-start: 14px;
-    padding: 6px 14px;
+    padding: 7px 15px;
     border-radius: 999px;
-    background: var(--b12-gold);
-    color: #241f1b;
+    /* The brand yellow at full strength, carrying dark ink: white on yellow
+       is 1.63:1 and unreadable. */
+    background: #FFC107;
+    color: #222222;
     font-size: .8rem;
     font-weight: 700;
     white-space: nowrap;
 }
-.b12-desk-link:hover { background: var(--b12-accent); color: #ffffff; }
+#header .b12-desk-link:hover,
+.b12-desk-link:hover { background: #FFFFFF; color: #8C1518; }
 
 /* ── Modern index dashboard ────────────────────────────────────────────── */
 
