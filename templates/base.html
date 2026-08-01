@@ -61,18 +61,6 @@
             --surface-card: {{ site.surface_color|default:'#FFFFFF' }};
             --status-whatsapp: {{ site.whatsapp_color|default:'#25D366' }};
         }
-        {# Temporary bridge: the stylesheet still carries the reference project's
-           variable names and is rewritten against the tokens in the storefront
-           redesign. Without this, editing a colour in the panel would silently
-           stop changing the page for the length of one phase. Delete with the
-           rewrite. #}
-        :root {
-            --brand-red: var(--brand-primary);
-            --brand-gold: var(--brand-accent);
-            --page-bg: var(--surface-page);
-            --surface: var(--surface-card);
-            --whatsapp: var(--status-whatsapp);
-        }
     </style>
     <script src="{% static 'restaurant/js/lucide-slim.js' %}" defer></script>
     <script src="{% static 'restaurant/js/main.js' %}" defer></script>

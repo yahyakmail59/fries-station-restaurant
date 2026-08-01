@@ -50,10 +50,12 @@ class Command(BaseCommand):
         site.about_text_en = 'B12 was born from a real passion for authentic flavour. We bring oriental grills and international dishes together under one roof, preparing every dish daily with carefully selected fresh ingredients.'
         site.show_about = True
 
-        site.primary_color = '#E30613'
-        site.gold_color = '#D4AF37'
-        site.background_color = '#050505'
-        site.surface_color = '#111111'
+        site.primary_color = '#D71920'
+        site.gold_color = '#FFC107'
+        site.deep_color = '#8C1518'
+        site.orange_color = '#FF6D00'
+        site.background_color = '#F5F5F5'
+        site.surface_color = '#FFFFFF'
         site.whatsapp_color = '#25D366'
 
         site.menu_title_ar = 'استكشف أقسام القائمة'
