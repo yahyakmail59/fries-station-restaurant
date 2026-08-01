@@ -39,12 +39,19 @@ class RestaurantSettingsAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        # Each colour is checked against the text colour it actually carries on
+        # the page, not against a fixed reference. The two reds are backgrounds
+        # for white text; the warm colours and the light surfaces are
+        # backgrounds for dark ink. Checking yellow against white would demand a
+        # yellow no customer would recognise as the brand's.
         checks = [
-            ('primary_color', '#FFFFFF', 'اللون الأحمر يجب أن يكون واضحًا مع النص الأبيض.'),
-            ('background_color', '#FFFFFF', 'لون الخلفية يجب أن يكون واضحًا مع النص الأبيض.'),
-            ('surface_color', '#FFFFFF', 'لون البطاقات يجب أن يكون واضحًا مع النص الأبيض.'),
-            ('gold_color', '#050505', 'اللون الذهبي يجب أن يكون واضحًا على الخلفية الداكنة.'),
-            ('whatsapp_color', '#050505', 'لون واتساب يجب أن يكون واضحًا مع النص الداكن.'),
+            ('primary_color', '#FFFFFF', 'الأحمر الأساسي يجب أن يكون واضحًا مع النص الأبيض فوقه.'),
+            ('deep_color', '#FFFFFF', 'الأحمر الداكن يجب أن يكون واضحًا مع النص الأبيض فوقه.'),
+            ('gold_color', '#222222', 'الأصفر المميز يجب أن يكون واضحًا مع النص الداكن فوقه.'),
+            ('orange_color', '#222222', 'البرتقالي يجب أن يكون واضحًا مع النص الداكن فوقه.'),
+            ('background_color', '#222222', 'خلفية الصفحة يجب أن تكون واضحة مع النص الداكن فوقها.'),
+            ('surface_color', '#222222', 'لون البطاقات يجب أن يكون واضحًا مع النص الداكن فوقه.'),
+            ('whatsapp_color', '#222222', 'لون واتساب يجب أن يكون واضحًا مع النص الداكن فوقه.'),
         ]
         for field_name, text_color, message in checks:
             value = cleaned.get(field_name)
@@ -75,8 +82,9 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
     form = RestaurantSettingsAdminForm
     fieldsets = (
         ('الهوية', {'fields': ('name_ar', 'name_en', 'tagline_ar', 'tagline_en', 'logo')}),
-        ('ألوان الواجهة', {'fields': (
+        ('ألوان الهوية', {'fields': (
             ('primary_color', 'gold_color'),
+            ('deep_color', 'orange_color'),
             ('background_color', 'surface_color'),
             'whatsapp_color',
         )}),

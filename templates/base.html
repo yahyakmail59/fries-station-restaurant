@@ -46,14 +46,32 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="{% static 'restaurant/css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
     <style>
+        {# The seven colours the restaurant can edit, written onto the semantic
+           tokens they stand for. Everything else in the stylesheet reads the
+           token, never the setting, so the palette has exactly one entry point. #}
         :root {
-            --brand-red: {{ site.primary_color|default:'#E30613' }};
-            --brand-gold: {{ site.gold_color|default:'#D4AF37' }};
-            --page-bg: {{ site.background_color|default:'#050505' }};
-            --surface: {{ site.surface_color|default:'#111111' }};
-            --whatsapp: {{ site.whatsapp_color|default:'#25D366' }};
+            --brand-primary: {{ site.primary_color|default:'#D71920' }};
+            --brand-accent: {{ site.gold_color|default:'#FFC107' }};
+            --brand-deep: {{ site.deep_color|default:'#8C1518' }};
+            --brand-orange: {{ site.orange_color|default:'#FF6D00' }};
+            --surface-page: {{ site.background_color|default:'#F5F5F5' }};
+            --surface-card: {{ site.surface_color|default:'#FFFFFF' }};
+            --status-whatsapp: {{ site.whatsapp_color|default:'#25D366' }};
+        }
+        {# Temporary bridge: the stylesheet still carries the reference project's
+           variable names and is rewritten against the tokens in the storefront
+           redesign. Without this, editing a colour in the panel would silently
+           stop changing the page for the length of one phase. Delete with the
+           rewrite. #}
+        :root {
+            --brand-red: var(--brand-primary);
+            --brand-gold: var(--brand-accent);
+            --page-bg: var(--surface-page);
+            --surface: var(--surface-card);
+            --whatsapp: var(--status-whatsapp);
         }
     </style>
     <script src="{% static 'restaurant/js/lucide-slim.js' %}" defer></script>

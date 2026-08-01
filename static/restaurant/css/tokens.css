@@ -1,0 +1,144 @@
+/* Fries Station — design tokens
+ *
+ * The single source of truth for the brand. Everything downstream reads a
+ * semantic name (`--brand-primary`) rather than a colour name, so a palette
+ * change happens here and nowhere else.
+ *
+ * Five of these values are overridden per-restaurant from the database in
+ * base.html. The literals below are the brand defaults and the fallback when
+ * no settings row exists yet.
+ *
+ * Contrast, measured against the text colour each surface actually carries:
+ *   primary #D71920 on white .......... 5.19:1
+ *   deep    #8C1518 on white .......... 9.39:1
+ *   accent  #FFC107 under #222222 ..... 9.76:1
+ *   orange  #FF6D00 under #222222 ..... 5.64:1
+ *   page    #F5F5F5 under #222222 ..... 14.59:1
+ *   card    #FFFFFF under #222222 ..... 15.91:1
+ *   muted   #555555 on white .......... 7.46:1
+ * The yellow and orange never carry white text — that pairing fails at
+ * 1.63:1 and 2.82:1. Dark ink on warm colour is the brand's own rule.
+ */
+
+:root {
+    /* ── Brand ─────────────────────────────────────────────────────────── */
+    --brand-primary: #D71920;   /* primary action, logo red */
+    --brand-accent:  #FFC107;   /* highlight, energy */
+    --brand-deep:    #8C1518;   /* deep sections, footers */
+    --brand-orange:  #FF6D00;   /* offers and urgency */
+    --brand-soft:    #FFE082;   /* soft yellow wash */
+    --brand-amber:   #FFB300;   /* between accent and orange */
+
+    /* ── Surfaces ──────────────────────────────────────────────────────── */
+    --surface-page:    #F5F5F5;
+    --surface-card:    #FFFFFF;
+    --surface-sunken:  #EDEDED;
+    --surface-deep:    var(--brand-deep);
+    --surface-invert:  #222222;
+
+    /* ── Text ──────────────────────────────────────────────────────────── */
+    --text-primary:  #222222;
+    --text-muted:    #555555;
+    --text-invert:   #FFFFFF;
+    --text-on-brand: #FFFFFF;   /* on --brand-primary / --brand-deep */
+    --text-on-warm:  #222222;   /* on --brand-accent / --brand-orange */
+
+    /* ── Lines and focus ───────────────────────────────────────────────── */
+    --border-subtle:  rgba(34, 34, 34, .12);
+    --border-strong:  rgba(34, 34, 34, .22);
+    --border-brand:   rgba(215, 25, 32, .32);
+    --border-accent:  rgba(255, 193, 7, .45);
+    --border-invert:  rgba(255, 255, 255, .18);
+    --focus-ring:     #8C1518;
+    --focus-ring-invert: #FFC107;
+
+    /* ── Status ────────────────────────────────────────────────────────── */
+    --status-success: #1B7F3B;
+    --status-error:   #B3121B;
+    --status-warning: #B26A00;
+    --status-info:    #0B5FA5;
+    --status-whatsapp: #25D366;
+
+    /* Tinted backgrounds for message and badge rows. */
+    --status-success-bg: #E7F4EB;
+    --status-error-bg:   #FCEAEA;
+    --status-warning-bg: #FDF3E0;
+    --status-info-bg:    #E8F1FA;
+
+    /* ── Typography ────────────────────────────────────────────────────── */
+    --font-display: "Bebas Neue", "Cairo", sans-serif;  /* English headlines */
+    --font-arabic:  "Cairo", sans-serif;                /* Arabic, all weights */
+    --font-latin:   "Montserrat", "Cairo", sans-serif;  /* English body */
+
+    --weight-body: 400;
+    --weight-medium: 600;
+    --weight-bold: 700;
+    --weight-black: 900;   /* Cairo Black — Arabic headlines */
+
+    --tracking-display: .04em;
+    --tracking-kicker: .14em;
+
+    /* ── Radii ─────────────────────────────────────────────────────────── */
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 22px;
+    --radius-xl: 32px;
+    --radius-pill: 999px;
+
+    /* ── Elevation ─────────────────────────────────────────────────────── */
+    --shadow-sm: 0 1px 2px rgba(34, 34, 34, .06), 0 2px 6px rgba(34, 34, 34, .05);
+    --shadow-md: 0 4px 10px rgba(34, 34, 34, .07), 0 12px 28px rgba(34, 34, 34, .08);
+    --shadow-lg: 0 10px 24px rgba(34, 34, 34, .10), 0 28px 60px rgba(34, 34, 34, .12);
+    --shadow-brand: 0 10px 26px rgba(215, 25, 32, .28);
+    --shadow-accent: 0 8px 22px rgba(255, 193, 7, .34);
+
+    /* ── Spacing ───────────────────────────────────────────────────────── */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 24px;
+    --space-6: 32px;
+    --space-7: 48px;
+    --space-8: 64px;
+    --space-9: 96px;
+
+    /* ── Layout ────────────────────────────────────────────────────────── */
+    --shell-width: 1180px;
+    --header-height: 94px;
+    --header-height-scrolled: 78px;
+
+    /* ── Motion ────────────────────────────────────────────────────────── */
+    --ease-out: cubic-bezier(.22, .61, .36, 1);
+    --ease-in-out: cubic-bezier(.65, .05, .36, 1);
+    --duration-fast: .16s;
+    --duration-base: .25s;
+    --duration-slow: .45s;
+
+    /* ── Brand graphic language ────────────────────────────────────────── */
+    /* Warm diagonal wash used behind deep sections. */
+    --gradient-brand: linear-gradient(135deg, var(--brand-primary), var(--brand-deep));
+    --gradient-warm: linear-gradient(135deg, var(--brand-orange), var(--brand-accent));
+    /* The red/yellow rule that separates blocks in the brand guide. */
+    --rule-brand: repeating-linear-gradient(
+        90deg,
+        var(--brand-primary) 0 18px,
+        transparent 18px 26px,
+        var(--brand-accent) 26px 44px,
+        transparent 44px 52px
+    );
+    /* Low-opacity texture. Kept subtle enough to sit under body text. */
+    --pattern-opacity: .05;
+}
+
+/* The brand runs on a light page in both schemes. Declaring the scheme stops
+   the browser from auto-darkening form controls into an unreadable mix. */
+:root { color-scheme: light; }
+
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --duration-fast: .01ms;
+        --duration-base: .01ms;
+        --duration-slow: .01ms;
+    }
+}

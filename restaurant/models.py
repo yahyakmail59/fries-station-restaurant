@@ -63,10 +63,15 @@ class RestaurantSettings(TimeStampedModel):
     )
     og_image = models.ImageField(upload_to='branding/', blank=True, verbose_name='صورة المشاركة الاجتماعية')
 
-    primary_color = models.CharField(max_length=20, default='#E30613', validators=[hex_color_validator], verbose_name='اللون الأحمر الرئيسي')
-    gold_color = models.CharField(max_length=20, default='#D4AF37', validators=[hex_color_validator], verbose_name='اللون الذهبي')
-    background_color = models.CharField(max_length=20, default='#050505', validators=[hex_color_validator], verbose_name='لون الخلفية')
-    surface_color = models.CharField(max_length=20, default='#111111', validators=[hex_color_validator], verbose_name='لون البطاقات')
+    # Five brand colours, each paired in the admin form with the text colour it
+    # actually carries: white sits on the two reds, dark ink sits on everything
+    # warm. Yellow on white would be 1.63:1 and is never allowed.
+    primary_color = models.CharField(max_length=20, default='#D71920', validators=[hex_color_validator], verbose_name='الأحمر الأساسي')
+    gold_color = models.CharField(max_length=20, default='#FFC107', validators=[hex_color_validator], verbose_name='الأصفر المميز')
+    deep_color = models.CharField(max_length=20, default='#8C1518', validators=[hex_color_validator], verbose_name='الأحمر الداكن')
+    orange_color = models.CharField(max_length=20, default='#FF6D00', validators=[hex_color_validator], verbose_name='البرتقالي (العروض)')
+    background_color = models.CharField(max_length=20, default='#F5F5F5', validators=[hex_color_validator], verbose_name='لون خلفية الصفحة')
+    surface_color = models.CharField(max_length=20, default='#FFFFFF', validators=[hex_color_validator], verbose_name='لون البطاقات')
     whatsapp_color = models.CharField(max_length=20, default='#25D366', validators=[hex_color_validator], verbose_name='لون واتساب')
 
     about_title_ar = models.CharField(max_length=160, default='من نحن', verbose_name='عنوان من نحن بالعربية')
