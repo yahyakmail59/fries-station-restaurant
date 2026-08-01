@@ -1251,6 +1251,42 @@ class OrderPricingTests(TestCase):
             self.assertEqual(self._post(payload).status_code, 200)
         self.assertEqual(self._post(payload).status_code, 429)
 
+    def _refusals(self):
+        """One call per way the endpoint can refuse an order."""
+        self.client.post(self.url, data='not json', content_type='application/json')
+        yield self.client.post(self.url, data='not json', content_type='application/json')
+        yield self._post({'items': []})
+        yield self._post({'items': [{'id': str(self.kebab.pk), 'qty': 1}] * 41})
+        yield self._post({'items': [{'id': 'not-a-dish', 'qty': 1}]})
+        yield self._post({
+            'items': [{'id': str(self.kebab.pk), 'qty': 1}],
+            'fulfillment': 'delivery',
+        })
+
+    def test_a_refusal_is_written_in_the_language_the_visitor_chose(self):
+        # An Arabic-only refusal is unreadable to a visitor who switched the
+        # site to English, and these messages are shown verbatim: they are
+        # JSON, so no template gets the chance to translate them.
+        self.client.get(reverse('restaurant:home'), {'lang': 'en'})
+        for response in self._refusals():
+            with self.subTest(status=response.status_code):
+                message = response.json()['error']
+                self.assertNotEqual(message, '')
+                self.assertFalse(
+                    any('؀' <= character <= 'ۿ' for character in message),
+                    f'English visitor was shown Arabic: {message}',
+                )
+
+        cache.clear()
+        self.client.get(reverse('restaurant:home'), {'lang': 'ar'})
+        for response in self._refusals():
+            with self.subTest(status=response.status_code):
+                message = response.json()['error']
+                self.assertTrue(
+                    any('؀' <= character <= 'ۿ' for character in message),
+                    f'Arabic visitor was shown English: {message}',
+                )
+
 
 class OrderCodeTests(TestCase):
     def setUp(self):

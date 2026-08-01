@@ -41,6 +41,17 @@ def _rate_limited(request):
         return False
 
 
+def _error(language, arabic, english, status=400):
+    """A refusal the customer can read.
+
+    This endpoint answers JSON, so its errors never pass through a template
+    and are shown to the customer exactly as written here. Every one of them
+    therefore has to follow the language the visitor chose, the same as the
+    reservation form and the cart already do.
+    """
+    return JsonResponse({'error': arabic if language == 'ar' else english}, status=status)
+
+
 def _clean_text(value, limit):
     return str(value or '').strip()[:limit]
 
@@ -53,22 +64,23 @@ def _phone_digits(value):
 def create_order(request):
     language = request.session.get('site_language', 'ar')
     if _rate_limited(request):
-        return JsonResponse(
-            {'error': 'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.'
-                      if language == 'ar' else 'Too many attempts. Please wait and try again.'},
+        return _error(
+            language,
+            'محاولات كثيرة. انتظر قليلًا ثم أعد المحاولة.',
+            'Too many attempts. Please wait and try again.',
             status=429,
         )
 
     try:
         payload = json.loads(request.body.decode('utf-8'))
     except (ValueError, UnicodeDecodeError):
-        return JsonResponse({'error': 'طلب غير صالح.'}, status=400)
+        return _error(language, 'طلب غير صالح.', 'Invalid request.')
 
     raw_items = payload.get('items')
     if not isinstance(raw_items, list) or not raw_items:
-        return JsonResponse({'error': 'السلة فارغة.'}, status=400)
+        return _error(language, 'السلة فارغة.', 'Your cart is empty.')
     if len(raw_items) > MAX_LINES:
-        return JsonResponse({'error': 'عدد الأصناف كبير جدًا.'}, status=400)
+        return _error(language, 'عدد الأصناف كبير جدًا.', 'That is too many items for one order.')
 
     # Only ids and quantities are read. A price in the payload is ignored.
     wanted_items, wanted_offers = {}, {}
@@ -94,7 +106,7 @@ def create_order(request):
         target[int(key)] = target.get(int(key), 0) + quantity
 
     if not wanted_items and not wanted_offers:
-        return JsonResponse({'error': 'لا يوجد صنف صالح في السلة.'}, status=400)
+        return _error(language, 'لا يوجد صنف صالح في السلة.', 'No valid item was found in your cart.')
 
     site = RestaurantSettings.load()
     fulfillment = 'delivery' if payload.get('fulfillment') == 'delivery' else 'pickup'
@@ -106,10 +118,10 @@ def create_order(request):
     if fulfillment == 'delivery':
         digits = _phone_digits(phone)
         if not name or not address or not 7 <= len(digits) <= 15:
-            return JsonResponse(
-                {'error': 'أدخل الاسم ورقم جوال صحيح وعنوان التوصيل.'
-                          if language == 'ar' else 'Enter a name, a valid phone and an address.'},
-                status=400,
+            return _error(
+                language,
+                'أدخل الاسم ورقم جوال صحيح وعنوان التوصيل.',
+                'Enter a name, a valid phone number and a delivery address.',
             )
 
     with transaction.atomic():
@@ -153,7 +165,12 @@ def create_order(request):
 
         if not lines:
             transaction.set_rollback(True)
-            return JsonResponse({'error': 'الأصناف المطلوبة لم تعد متاحة.'}, status=409)
+            return _error(
+                language,
+                'الأصناف المطلوبة لم تعد متاحة.',
+                'The items you asked for are no longer available.',
+                status=409,
+            )
 
         OrderLine.objects.bulk_create(lines)
         order.total = total
