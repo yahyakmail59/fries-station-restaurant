@@ -1,0 +1,202 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>الطلب {{ order.code }} — {{ site.name_ar }}</title>
+    <link rel="icon" href="{% static 'restaurant/img/favicon.ico' %}" sizes="32x32">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
+    <style>
+        :root {
+            --bg: #0d0d0d; --card: #141414; --line: #242424;
+            --ink: #ffffff; --dim: #a8a8a8; --faint: #7a7a7a;
+            --gold: #d4af37; --red: #e30613; --wa: #25d366;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; background: var(--bg); color: var(--ink);
+            font-family: "Cairo", sans-serif; font-variant-numeric: tabular-nums;
+            line-height: 1.65; padding: 22px 16px 48px;
+        }
+        .sheet { width: min(560px, 100%); margin-inline: auto; }
+        h1, h2 { margin: 0; line-height: 1.25; }
+        a { color: inherit; text-decoration: none; }
+
+        .head { text-align: center; padding-bottom: 20px; }
+        .head b { display: block; font-size: 1.2rem; font-weight: 900; }
+        .head small { color: var(--gold); font-size: .8rem; }
+
+        .code-card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+            padding: 18px; text-align: center; margin-bottom: 14px;
+        }
+        .code-card span { display: block; font-size: .74rem; color: var(--faint); letter-spacing: .1em; }
+        .code-card b { display: block; font-size: 2rem; font-weight: 900; color: var(--gold); letter-spacing: .05em; }
+        .pill {
+            display: inline-block; margin-top: 8px; padding: 4px 13px; border-radius: 999px;
+            font-size: .76rem; font-weight: 700;
+            background: rgba(227,6,19,.16); color: #ff7a80;
+        }
+        .pill.pickup { background: rgba(212,175,55,.16); color: var(--gold); }
+        .pill.dine_in { background: rgba(37,211,102,.14); color: var(--wa); }
+        .status { margin-top: 8px; font-size: .78rem; color: var(--dim); }
+
+        .card {
+            background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+            padding: 16px 18px; margin-bottom: 14px;
+        }
+        .card h2 { font-size: .82rem; color: var(--faint); font-weight: 600; margin-bottom: 10px; }
+        .line { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #1c1c1c; font-size: .92rem; }
+        .line:last-child { border-bottom: 0; }
+        .line em { font-style: normal; color: var(--faint); }
+        .line .quote { color: var(--gold); font-size: .8rem; }
+        .total {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-top: 12px; padding: 13px 15px; border-radius: 12px;
+            background: rgba(212,175,55,.09); border: 1px solid rgba(212,175,55,.3);
+        }
+        .total span { color: var(--gold); font-size: .9rem; }
+        .total b { color: var(--gold); font-size: 1.4rem; font-weight: 900; }
+        .note { margin-top: 8px; font-size: .76rem; color: var(--faint); }
+
+        dl { margin: 0; display: grid; gap: 8px; }
+        dl > div { display: flex; gap: 10px; font-size: .88rem; }
+        dt { color: var(--faint); min-width: 74px; }
+        dd { margin: 0; }
+
+        .receipt-actions { display: grid; gap: 8px; margin-bottom: 14px; }
+        .receipt-link {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            min-height: 46px; border-radius: 12px; border: 1px solid var(--line);
+            font-size: .86rem; font-weight: 700; color: var(--dim);
+            background: transparent; font-family: inherit; cursor: pointer;
+        }
+        .receipt-link:hover { color: var(--ink); border-color: var(--gold); }
+        .receipt-link.share { border-color: rgba(37,211,102,.45); color: var(--wa); }
+        .receipt-link.share:hover { border-color: var(--wa); }
+        .receipt-link[hidden] { display: none; }
+
+        .staff {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 13px 16px; border-radius: 12px;
+            background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.35);
+            font-size: .84rem;
+        }
+        .staff a { color: var(--wa); font-weight: 700; }
+        .foot { text-align: center; font-size: .74rem; color: var(--faint); margin-top: 20px; line-height: 1.9; }
+    </style>
+</head>
+<body>
+<div class="sheet">
+
+    <div class="head">
+        <b>{{ order.restaurant_name|default:site.name_ar }}</b>
+        <small>{{ order.restaurant_tagline|default:site.tagline_ar }}</small>
+    </div>
+
+    <div class="code-card">
+        <span>رقم الطلب</span>
+        <b>{{ order.code }}</b>
+        <span class="pill {{ order.fulfillment }}">{{ order.get_fulfillment_display }}</span>
+        <p class="status">{{ order.created_at|date:'j F Y — H:i' }} · {{ order.get_status_display }}</p>
+    </div>
+
+    <div class="receipt-actions">
+        <a class="receipt-link" href="{{ receipt_url }}" target="_blank" rel="noopener">عرض صورة الفاتورة</a>
+        {# Only shown when the device can actually share a file. #}
+        <button class="receipt-link share" type="button" id="share-receipt" hidden
+                data-receipt="{{ receipt_url }}" data-code="{{ order.code }}">مشاركة صورة الفاتورة</button>
+    </div>
+
+    <div class="card">
+        <h2>الأصناف</h2>
+        {% for line in order.lines.all %}
+        <div class="line">
+            <span>{{ line.name_ar }} <em>× {{ line.quantity }}</em></span>
+            {% if line.is_priced %}
+            <span>{{ line.line_total|floatformat:'-2' }} {{ order.currency }}</span>
+            {% else %}
+            <span class="quote">{{ line.price_note|default:'يُحدد عند التأكيد' }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <div class="total">
+            <span>الإجمالي</span>
+            <b>{{ order.total|floatformat:'-2' }} {{ order.currency }}</b>
+        </div>
+        {% if order.has_unpriced_lines %}
+        <p class="note">يضاف إليه سعر العروض التي تُحدد عند التأكيد.</p>
+        {% endif %}
+    </div>
+
+    {% if order.customer_name or order.phone or order.address or order.notes or order.source == 'cashier' %}
+    <div class="card">
+        <h2>بيانات العميل</h2>
+        <dl>
+            {% if order.customer_name %}<div><dt>الاسم</dt><dd>{{ order.customer_name }}</dd></div>{% endif %}
+            {% if order.source == 'cashier' %}<div><dt>الزبائن</dt><dd>{{ order.customer_count }}</dd></div>{% endif %}
+            {% if order.table_number %}<div><dt>الطاولة</dt><dd>{{ order.table_number }}</dd></div>{% endif %}
+            {% if order.phone %}<div><dt>الجوال</dt><dd dir="ltr">{{ order.phone }}</dd></div>{% endif %}
+            {% if order.address %}<div><dt>العنوان</dt><dd>{{ order.address }}</dd></div>{% endif %}
+            {% if order.notes %}<div><dt>ملاحظات</dt><dd>{{ order.notes }}</dd></div>{% endif %}
+        </dl>
+    </div>
+    {% endif %}
+
+    {% if is_staff_viewer %}
+    <div class="staff">
+        <span>أنت مسجّل كموظف</span>
+        {% if can_manage_order %}<a href="{% url 'restaurant:panel_edit' 'orders' order.pk %}">إدارة الطلب في اللوحة ←</a>{% endif %}
+    </div>
+    {% endif %}
+
+    <p class="foot">
+        الأسعار في هذه الصفحة محسوبة على خادم المطعم ولا يمكن تعديلها من المتصفح.<br>
+        هذه الصفحة هي المرجع المعتمد لهذا الطلب.
+    </p>
+</div>
+
+<script>
+// Sharing a file is only offered where the device really supports it. The
+// button stays hidden otherwise, so nothing can hang waiting on a share
+// sheet that will never open.
+(function () {
+    var button = document.getElementById('share-receipt');
+    if (!button || !navigator.canShare || typeof File !== 'function') return;
+
+    var probe = new File([new Blob([''], {type: 'image/png'})], 'probe.png', {type: 'image/png'});
+    try {
+        if (!navigator.canShare({files: [probe]})) return;
+    } catch (error) {
+        return;
+    }
+    button.hidden = false;
+
+    button.addEventListener('click', function () {
+        var label = button.textContent;
+        button.disabled = true;
+        button.textContent = 'جارٍ التحضير…';
+
+        fetch(button.dataset.receipt, {credentials: 'same-origin'})
+            .then(function (response) { return response.blob(); })
+            .then(function (blob) {
+                var file = new File([blob], button.dataset.code + '.png', {type: 'image/png'});
+                // No text alongside the file: WhatsApp drops it anyway, and
+                // some Android builds mishandle files plus text together.
+                return navigator.share({files: [file]});
+            })
+            .catch(function () { /* cancelled or unsupported — nothing to undo */ })
+            .then(function () {
+                button.disabled = false;
+                button.textContent = label;
+            });
+    });
+}());
+</script>
+</body>
+</html>

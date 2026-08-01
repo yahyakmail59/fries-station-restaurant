@@ -1,0 +1,135 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}لوحة التحكم{% endblock %} — {{ site.name_ar }}</title>
+    <link rel="icon" href="{% static 'restaurant/img/favicon.ico' %}" sizes="32x32">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&display=swap">
+    <link rel="stylesheet" href="{% static 'restaurant/css/dashboard.css' %}">
+    <script>
+        // Applied before first paint so the page never flashes the wrong theme.
+        // The key and values match the Django admin's own toggle.
+        (function () {
+            try {
+                var saved = localStorage.getItem('theme');
+                if (saved === 'light' || saved === 'dark' || saved === 'auto') {
+                    document.documentElement.setAttribute('data-theme', saved);
+                }
+            } catch (error) { /* private mode — fall back to the system theme */ }
+        }());
+    </script>
+    <script src="{% static 'restaurant/js/dashboard.js' %}" defer></script>
+</head>
+<body>
+
+<a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+
+<div class="app">
+
+    <button class="nav-toggle" type="button" data-nav-toggle aria-expanded="false" aria-controls="sidebar">
+        <span class="bars" aria-hidden="true"></span> القائمة
+    </button>
+
+    <aside class="sidebar" id="sidebar">
+        <a class="logo" href="{% url 'restaurant:dashboard' %}">
+            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/b12-logo-clean.jpg' %}{% endif %}"
+                 alt="{{ site.name_en }}" width="890" height="810">
+        </a>
+
+        <nav class="side-nav" aria-label="التنقل الرئيسي">
+            <a href="{% url 'restaurant:dashboard' %}" {% if active_section == 'customers' %}class="is-active" aria-current="page"{% endif %}>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 11a3 3 0 1 0 0-6M18 20c0-2.5-1-4.3-2.6-5.2"/></svg>
+                العملاء
+            </a>
+
+            {% if perms.restaurant.add_order %}
+            <a href="{% url 'restaurant:cashier' %}" {% if active_section == 'cashier' %}class="is-active" aria-current="page"{% endif %}>
+                {% include 'restaurant/partials/panel-icon.html' with name='cashier' %}
+                الكاشير
+            </a>
+            {% endif %}
+
+            {% for group, items in nav_groups.items %}
+            <p class="nav-group">{{ group }}</p>
+            {% for item in items %}
+            <a href="{% url 'restaurant:panel_list' item.slug %}" {% if item.is_active %}class="is-active" aria-current="page"{% endif %}>
+                {% include 'restaurant/partials/panel-icon.html' with name=item.icon %}
+                {{ item.title }}
+            </a>
+            {% endfor %}
+            {% endfor %}
+
+            {% if perms.restaurant.change_restaurantsettings %}
+            <p class="nav-group">الموقع</p>
+            <a href="{% url 'restaurant:panel_settings' %}" {% if active_section == 'settings' %}class="is-active" aria-current="page"{% endif %}>
+                {% include 'restaurant/partials/panel-icon.html' with name='settings' %}
+                إعدادات الموقع
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="side-foot">
+            <a class="side-link" href="{% url 'restaurant:home' %}" target="_blank" rel="noopener">
+                {% include 'restaurant/partials/panel-icon.html' with name='globe' %}
+                عرض الموقع
+            </a>
+            <button type="button" class="side-link" data-theme-toggle aria-pressed="false">
+                {% include 'restaurant/partials/panel-icon.html' with name='theme' %}
+                <span data-theme-label>الوضع الداكن</span>
+            </button>
+            <form method="post" action="{% url 'admin:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="side-link">
+                    {% include 'restaurant/partials/panel-icon.html' with name='logout' %}
+                    تسجيل الخروج
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <div class="main" id="main">
+
+        <header class="topbar">
+            {% block topbar_start %}<span class="crumb">{% block crumb %}{% endblock %}</span>{% endblock %}
+
+            <div class="topbar-end">
+                {% block topbar_extra %}{% endblock %}
+                <div class="who">
+                    <span class="who-avatar" aria-hidden="true">{{ user_initial }}</span>
+                    <span class="who-text">
+                        <b>{{ user_name }}</b>
+                        {% if request.user.email %}<small>{{ request.user.email }}</small>{% endif %}
+                    </span>
+                </div>
+            </div>
+        </header>
+
+        <div class="panel">
+            <div class="panel-title">
+                <h1>{% block page_title %}{% endblock %}</h1>
+                <p>{% block page_sub %}{% endblock %}</p>
+            </div>
+
+            {% if messages %}
+            <div class="toasts" role="status">
+                {% for message in messages %}<p class="toast toast-{{ message.tags }}">{{ message }}</p>{% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+
+            <footer class="foot">
+                <span>{{ site.name_ar }} — {{ site.name_en }}</span>
+                {% block foot_note %}{% endblock %}
+            </footer>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

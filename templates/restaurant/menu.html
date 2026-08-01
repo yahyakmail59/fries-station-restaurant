@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static l10n %}
+
+{% block title %}{% if language == 'ar' %}منيو {{ site.name_ar }}{% else %}{{ site.name_en }} Menu{% endif %}{% endblock %}
+
+{% block content %}
+<section class="menu-page-hero" id="menu-top">
+    <div class="page-shell menu-page-hero-inner">
+        <div class="menu-page-kicker"><i data-lucide="utensils"></i><span>{% if language == 'ar' %}منيو المطعم{% else %}RESTAURANT MENU{% endif %}</span></div>
+        <h1>{% if language == 'ar' %}اختر وجبتك بسهولة{% else %}Choose Your Meal Easily{% endif %}</h1>
+        <p>{% if language == 'ar' %}كل الأصناف والأسعار المحدثة في مكان واحد، مع طلب مباشر من جوالك.{% else %}Every available dish and current price in one place, ready to order from your phone.{% endif %}</p>
+        <div class="menu-page-trust">
+            <span><i data-lucide="badge-check"></i>{% if language == 'ar' %}أسعار محدثة{% else %}Current prices{% endif %}</span>
+            <span><i data-lucide="smartphone"></i>{% if language == 'ar' %}مصمم للجوال والـ QR{% else %}Built for mobile & QR{% endif %}</span>
+            <span><i data-lucide="shopping-cart"></i>{% if language == 'ar' %}طلب مباشر{% else %}Direct ordering{% endif %}</span>
+        </div>
+    </div>
+</section>
+
+<section class="menu-page-catalog" id="menu-catalog">
+    <div class="page-shell">
+        <div class="menu-page-heading menu-catalog-heading">
+            <div>
+                <span>{% if language == 'ar' %}استكشف الأصناف{% else %}EXPLORE THE MENU{% endif %}</span>
+                <h2>{% if language == 'ar' %}المنيو الكامل{% else %}Full Menu{% endif %}</h2>
+            </div>
+            <label class="menu-search" for="menu-search">
+                <i data-lucide="search"></i>
+                <input id="menu-search" type="search" placeholder="{% if language == 'ar' %}ابحث عن وجبة...{% else %}Search for a dish...{% endif %}" autocomplete="off">
+            </label>
+        </div>
+
+        <div class="category-grid menu-page-categories" id="category-filter-bar" role="group" aria-label="{% if language == 'ar' %}تصنيفات القائمة{% else %}Menu categories{% endif %}">
+            <button class="category-card mobile-all-category{% if active_category == 'all' %} active{% endif %}" type="button" data-filter="all" data-filter-label="{% if language == 'ar' %}المنيو الكامل{% else %}Full menu{% endif %}" aria-pressed="{% if active_category == 'all' %}true{% else %}false{% endif %}">
+                <span class="category-icon"><i data-lucide="utensils"></i></span>
+                <strong>{% if language == 'ar' %}الكل{% else %}All{% endif %}</strong>
+                <small>{% if language == 'ar' %}المنيو الكامل{% else %}FULL MENU{% endif %}</small>
+            </button>
+            {% for category in categories %}
+            <button class="category-card{% if active_category == category.slug %} active{% endif %}" type="button" data-filter="{{ category.slug }}" data-filter-label="{% if language == 'ar' %}{{ category.name_ar }}{% else %}{{ category.name_en }}{% endif %}" aria-pressed="{% if active_category == category.slug %}true{% else %}false{% endif %}">
+                <span class="category-icon"><i data-lucide="{{ category.lucide_icon }}"></i></span>
+                <strong>{% if language == 'ar' %}{{ category.name_ar }}{% else %}{{ category.name_en }}{% endif %}</strong>
+                <small>{% if language == 'ar' %}{{ category.name_en|upper }}{% else %}{{ category.name_ar }}{% endif %}</small>
+                {% if category.image_src %}<img src="{{ category.image_src }}" alt="" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                <span class="category-vignette"></span>
+            </button>
+            {% endfor %}
+        </div>
+
+        <div class="menu-results-bar menu-page-results" aria-live="polite">
+            <div>
+                <strong id="active-filter-label">{% if active_category == 'all' %}{% if language == 'ar' %}المنيو الكامل{% else %}Full menu{% endif %}{% else %}{% for category in categories %}{% if category.slug == active_category %}{% if language == 'ar' %}{{ category.name_ar }}{% else %}{{ category.name_en }}{% endif %}{% endif %}{% endfor %}{% endif %}</strong>
+                <small>
+                    <span id="visible-menu-count">{{ menu_items|length }}</span>
+                    {% if language == 'ar' %}من{% else %}of{% endif %}
+                    <span id="total-menu-count">{{ menu_items|length }}</span>
+                    {% if language == 'ar' %}صنف{% else %}items{% endif %}
+                </small>
+            </div>
+            <button class="menu-show-all-btn{% if active_category == 'all' %} active{% endif %}" type="button"
+                    data-filter="all" data-clear-search="true"
+                    data-filter-label="{% if language == 'ar' %}المنيو الكامل{% else %}Full menu{% endif %}"
+                    aria-pressed="{% if active_category == 'all' %}true{% else %}false{% endif %}">
+                <i data-lucide="layout-grid"></i>
+                <span>{% if language == 'ar' %}عرض الكل{% else %}Show all{% endif %}</span>
+            </button>
+        </div>
+
+        <div class="menu-grid menu-page-grid" id="menu-grid" data-page-size="6">
+            {% for item in menu_items %}
+            <article class="menu-card reveal" data-category="{{ item.category.slug }}" data-search="{{ item.name_ar }} {{ item.name_en }} {{ item.description_ar }} {{ item.description_en }}">
+                <div class="menu-image">
+                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                    {% if language == 'ar' and item.badge_ar %}<span class="dish-badge">{{ item.badge_ar }}</span>{% elif language == 'en' and item.badge_en %}<span class="dish-badge">{{ item.badge_en }}</span>{% endif %}
+                    <span class="image-sheen"></span>
+                </div>
+                <div class="menu-content">
+                    <h3>{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}</h3>
+                    <h4>{% if language == 'ar' %}{{ item.name_en|upper }}{% else %}{{ item.name_ar }}{% endif %}</h4>
+                    <p>{% if language == 'ar' %}{{ item.description_ar|truncatechars:105 }}{% else %}{{ item.description_en|default:item.description_ar|truncatechars:105 }}{% endif %}</p>
+                    <div class="menu-bottom">
+                        <div class="price-wrap">
+                            {% if item.old_price %}<del>{{ item.old_price|floatformat:-2 }}</del>{% endif %}
+                            <strong>{{ item.price|floatformat:-2 }} <small>{{ site.currency }}</small></strong>
+                        </div>
+                        <button class="mini-whatsapp js-add-item{% if item.is_featured %} featured-order-btn{% endif %}" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
+                            <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
+                            {% if item.is_featured %}<span class="add-label">{% if language == 'ar' %}اطلب الطبق{% else %}Order dish{% endif %}</span>{% endif %}
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {% empty %}
+            <p class="empty-state">{% if language == 'ar' %}لا توجد أطباق متاحة حاليًا.{% else %}No dishes are currently available.{% endif %}</p>
+            {% endfor %}
+            <p class="empty-state filter-empty hidden" id="filter-empty" role="status" aria-live="polite">{% if language == 'ar' %}لا توجد وجبات تطابق اختيارك أو بحثك.{% else %}No dishes match your selection or search.{% endif %}</p>
+        </div>
+        <div class="menu-load-more-wrap">
+            <button class="menu-load-more-btn hidden" id="menu-load-more" type="button">
+                <i data-lucide="chevrons-down"></i>
+                <span>{% if language == 'ar' %}عرض 6 أصناف إضافية{% else %}Show 6 more dishes{% endif %}</span>
+                <small>
+                    <span id="remaining-menu-count">0</span>
+                    {% if language == 'ar' %}متبقٍ{% else %}remaining{% endif %}
+                </small>
+            </button>
+        </div>
+    </div>
+</section>
+
+{% if best_sellers %}
+<section class="menu-page-best" id="menu-best">
+    <div class="page-shell">
+        <div class="menu-page-heading">
+            <div>
+                <span>{% if language == 'ar' %}اختيارات زبائننا{% else %}CUSTOMER FAVOURITES{% endif %}</span>
+                <h2>{% if language == 'ar' %}الأكثر طلبًا{% else %}Most Ordered{% endif %}</h2>
+            </div>
+            <small>{% if language == 'ar' %}مرتب تلقائيًا من الطلبات الحقيقية{% else %}Ranked automatically from real orders{% endif %}</small>
+        </div>
+        <div class="menu-spotlight-grid">
+            {% for item in best_sellers %}
+            <article class="menu-spotlight-card reveal">
+                <div class="menu-spotlight-image">
+                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                    <span>#{{ forloop.counter }}</span>
+                </div>
+                <div class="menu-spotlight-copy">
+                    <h3>{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}</h3>
+                    <small><i data-lucide="flame"></i>{{ item.order_count }} {% if language == 'ar' %}طلب{% else %}orders{% endif %}</small>
+                    <div>
+                        <strong>{{ item.price|floatformat:-2 }} <em>{{ site.currency }}</em></strong>
+                        <button class="mini-whatsapp js-add-item" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
+                            <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% if offers %}
+<section class="menu-page-offers" id="menu-offers">
+    <div class="page-shell">
+        <div class="menu-page-heading">
+            <div>
+                <span>{% if language == 'ar' %}وفر أكثر مع عروضنا{% else %}SPECIAL SAVINGS{% endif %}</span>
+                <h2>{% if language == 'ar' %}العروض المتاحة{% else %}Available Offers{% endif %}</h2>
+            </div>
+            <small>{% if language == 'ar' %}أضف العرض مباشرة إلى طلبك{% else %}Add an offer directly to your order{% endif %}</small>
+        </div>
+        <div class="offers-grid menu-page-offers-grid">
+            {% for offer in offers %}
+            <article class="offer-card reveal">
+                {% if offer.image_src %}<img src="{{ offer.image_src }}" alt="{% if language == 'ar' %}{{ offer.title_ar }}{% else %}{{ offer.title_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                <div class="offer-overlay"></div>
+                <div class="offer-copy">
+                    <h3>{% if language == 'ar' %}{{ offer.title_ar }}{% else %}{{ offer.title_en }}{% endif %}</h3>
+                    <h4>{% if language == 'ar' %}{{ offer.title_en|upper }}{% else %}{{ offer.title_ar }}{% endif %}</h4>
+                    <p>{% if language == 'ar' %}{{ offer.description_ar }}{% else %}{{ offer.description_en|default:offer.description_ar }}{% endif %}</p>
+                    <div class="offer-bottom">
+                        <strong>{% if language == 'ar' %}{{ offer.price_text_ar }}{% else %}{{ offer.price_text_en|default:offer.price_text_ar }}{% endif %}</strong>
+                        <button class="offer-order-btn js-add-item" type="button"
+                                data-id="offer-{{ offer.id }}"
+                                data-name-ar="{{ offer.title_ar|escape }}"
+                                data-name-en="{{ offer.title_en|escape }}"
+                                data-price-text-ar="{{ offer.price_text_ar|escape }}"
+                                data-price-text-en="{{ offer.price_text_en|default:offer.price_text_ar|escape }}"
+                                data-offer="true"
+                                aria-label="{% if language == 'ar' %}أضف عرض {{ offer.title_ar }} إلى السلة{% else %}Add {{ offer.title_en }} offer to cart{% endif %}">
+                            <i data-lucide="shopping-cart"></i>
+                            <span>{% if language == 'ar' %}اطلب العرض{% else %}Order offer{% endif %}</span>
+                        </button>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<footer class="menu-page-footer">
+    <div class="page-shell">
+        <span>{{ site.name_ar }} · {{ site.name_en }}</span>
+        <a href="{% url 'restaurant:home' %}">{% if language == 'ar' %}العودة إلى الموقع الرئيسي{% else %}Back to the main website{% endif %}</a>
+    </div>
+</footer>
+{% endblock %}

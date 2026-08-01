@@ -1,0 +1,11 @@
+Django==5.2.16
+Pillow>=11.0,<13.0
+# Order receipts are drawn server-side. This Pillow build has no Raqm, so
+# Arabic is shaped and reordered in Python before it is drawn.
+arabic-reshaper>=3.0,<4.0
+python-bidi>=0.6,<0.7
+whitenoise>=6.9,<7.0
+gunicorn>=23.0,<24.0
+dj-database-url>=3.0,<4.0
+psycopg[binary]>=3.2,<4.0
+django-storages[s3]>=1.14.6,<2.0

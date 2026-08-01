@@ -1,0 +1,205 @@
+{% extends 'restaurant/panel_base.html' %}
+
+{% block title %}العملاء{% endblock %}
+{% block page_title %}لوحة العملاء{% endblock %}
+{% block page_sub %}أهلًا بعودتك، {{ user_name }}{% endblock %}
+
+{% block topbar_start %}
+<form method="get" class="sort-pill">
+    <label for="sort">ترتيب</label>
+    <select id="sort" name="sort" data-auto-submit>
+        {% for option in sort_options %}
+        <option value="{{ option.value }}" {% if sort == option.value %}selected{% endif %}>{{ option.label }}</option>
+        {% endfor %}
+    </select>
+    {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+    {% if active_segment %}<input type="hidden" name="segment" value="{{ active_segment }}">{% endif %}
+</form>
+{% endblock %}
+
+{% block topbar_extra %}
+<a class="bell" href="{% url 'restaurant:panel_list' 'reservations' %}"
+   aria-label="{{ awaiting_count }} حجزًا ينتظر ردًا">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    {% if awaiting_count %}<i>{{ awaiting_count }}</i>{% endif %}
+</a>
+{% endblock %}
+
+{% block foot_note %}<span>العملاء محسوبون من سجل الحجوزات، ويُحدَّثون تلقائيًا.</span>{% endblock %}
+
+{% block content %}
+
+<section class="counters" aria-label="ملخص العملاء">
+    {% for counter in counters %}
+    <article class="counter counter-{{ counter.key }}{% if counter.urgent %} is-urgent{% endif %}">
+        <div class="counter-head">
+            <span class="counter-label">{{ counter.label }}</span>
+            <span class="counter-badge" aria-hidden="true"></span>
+        </div>
+        <b class="counter-value">{{ counter.value }}{% if counter.suffix %}<em>{{ counter.suffix }}</em>{% endif %}</b>
+
+        {% with chart=counter.chart_data %}
+        {% if chart %}
+        <div class="spark" role="img" aria-label="{{ counter.label }} خلال الفترة السابقة">
+            {% if chart.kind == 'bars' %}
+            <div class="spark-bars">
+                {% for bar in chart.bars %}
+                <span style="--h: {{ bar.height }}%" title="{{ bar.value }}"></span>
+                {% endfor %}
+            </div>
+            {% else %}
+            <svg class="spark-line" viewBox="0 0 100 34" preserveAspectRatio="none">
+                <polyline points="{{ chart.points }}"/>
+            </svg>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <span class="counter-note">{{ counter.note }}</span>
+    </article>
+    {% endfor %}
+</section>
+
+{# ── Tonight: who is coming, and how well we know them ───────────────── #}
+<section class="block" id="tonight" aria-labelledby="tonight-title">
+    <div class="block-head">
+        <h2 id="tonight-title">ضيوف الليلة</h2>
+        <span class="block-meta">{{ today|date:'j F Y' }}</span>
+    </div>
+
+    {% if tonight %}
+    <ul class="rows">
+        {% for row in tonight %}
+        <li class="row">
+            <span class="avatar avatar-{{ row.segment_tone }}" aria-hidden="true">{{ row.initial }}</span>
+            <span class="row-name">{{ row.object.full_name }}</span>
+            <span class="row-sub">{{ row.guests_phrase }}{% if row.object.occasion %} · {{ row.object.occasion }}{% endif %}</span>
+            <span class="tag tag-{{ row.segment_tone }}">{{ row.visit_badge }}</span>
+            <span class="row-time">{{ row.object.time|time:'H:i' }}</span>
+            <span class="row-actions">
+                {% if row.whatsapp_url %}
+                <a class="btn btn-wa" href="{{ row.whatsapp_url }}" target="_blank" rel="noopener">واتساب</a>
+                {% endif %}
+                {% if can_edit_reservations and row.status != 'confirmed' %}
+                <form method="post" action="{% url 'restaurant:dashboard_reservation_status' row.object.pk %}" class="inline-form">
+                    {% csrf_token %}
+                    {% for key, value in carried_query.items %}
+                    <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endfor %}
+                    <button type="submit" name="status" value="confirmed" class="btn btn-solid">تأكيد</button>
+                </form>
+                {% endif %}
+            </span>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p class="empty">لا حجوزات لهذه الليلة.</p>
+    {% endif %}
+</section>
+
+{# ── The customer list ───────────────────────────────────────────────── #}
+<section class="block" id="customers" aria-labelledby="customers-title">
+    <div class="block-head">
+        <h2 id="customers-title">قائمة العملاء</h2>
+        <span class="block-meta">{{ match_phrase }}{% if is_filtered %} من {{ total_customers }}{% endif %}</span>
+    </div>
+
+    <form method="get" class="filters" role="search">
+        <div class="search">
+            <label class="sr-only" for="q">ابحث بالاسم أو رقم الجوال</label>
+            <input id="q" type="search" name="q" value="{{ query }}"
+                   placeholder="ابحث بالاسم أو رقم الجوال" autocomplete="off">
+            <button type="submit" class="btn btn-solid">بحث</button>
+        </div>
+        {% if sort != 'last' %}<input type="hidden" name="sort" value="{{ sort }}">{% endif %}
+        {% if active_segment %}<input type="hidden" name="segment" value="{{ active_segment }}">{% endif %}
+    </form>
+
+    <div class="chips" role="group" aria-label="تصفية حسب نوع العميل">
+        <a class="chip{% if not active_segment %} chip-on{% endif %}"
+           href="?{% if sort != 'last' %}sort={{ sort }}{% endif %}">الكل <b>{{ total_customers }}</b></a>
+        {% for item in segments %}
+        <a class="chip chip-{{ item.tone }}{% if active_segment == item.key %} chip-on{% endif %}"
+           href="?segment={{ item.key }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if sort != 'last' %}&sort={{ sort }}{% endif %}"
+           title="{{ item.hint }}">{{ item.label }} <b>{{ item.count }}</b></a>
+        {% endfor %}
+    </div>
+
+    {% if page.object_list %}
+    <ul class="rows">
+        {% for customer in page.object_list %}
+        <li>
+            <details class="customer">
+                <summary class="row">
+                    <span class="avatar avatar-{{ customer.segment_tone }}" aria-hidden="true">{{ customer.initial }}</span>
+                    <span class="row-name">{{ customer.name }}</span>
+                    <span class="row-sub" dir="ltr">{{ customer.phone }}</span>
+                    <span class="tag tag-{{ customer.segment_tone }}">{{ customer.segment_label }}</span>
+
+                    {# Twelve months of visits — spot "every month" vs "stopped" #}
+                    <span class="rhythm" role="img" aria-label="إيقاع الزيارات خلال 12 شهرًا">
+                        {% for cell in customer.rhythm %}
+                        <i class="rhythm-cell level-{{ cell.level }}" title="{{ cell.label }}: {{ cell.visits }}"></i>
+                        {% endfor %}
+                    </span>
+
+                    <span class="row-stat"><b>{{ customer.visits }}</b> زيارة</span>
+                    <span class="row-time">{{ customer.last_visit_phrase }}</span>
+                    <span class="chevron" aria-hidden="true"></span>
+                </summary>
+
+                <div class="customer-detail">
+                    <dl class="facts">
+                        <div><dt>أول زيارة</dt><dd>{% if customer.first_visit %}{{ customer.first_visit|date:'j F Y' }}{% else %}—{% endif %}</dd></div>
+                        <div><dt>آخر زيارة</dt><dd>{% if customer.last_visit %}{{ customer.last_visit|date:'j F Y' }}{% else %}—{% endif %}</dd></div>
+                        <div><dt>متوسط الطاولة</dt><dd>{{ customer.covers_phrase }} على {{ customer.visits_phrase }}</dd></div>
+                        {% if customer.favourite_occasion %}
+                        <div><dt>أكثر مناسبة</dt><dd>{{ customer.favourite_occasion }}</dd></div>
+                        {% endif %}
+                        {% if customer.next_visit %}
+                        <div><dt>حجز قادم</dt><dd class="good">{{ customer.next_visit|date:'j F Y' }}</dd></div>
+                        {% endif %}
+                        {% if customer.cancellations %}
+                        <div><dt>حجوزات ملغاة</dt><dd>{{ customer.cancellations }}</dd></div>
+                        {% endif %}
+                    </dl>
+
+                    <div class="detail-actions">
+                        <a class="btn btn-wa" href="{{ customer.whatsapp_url }}" target="_blank" rel="noopener">مراسلة واتساب</a>
+                        <a class="btn" href="{{ customer.call_url }}">اتصال</a>
+                        {% if customer.segment == 'lapsed' %}
+                        <span class="nudge">لم يزر منذ {{ customer.last_visit_phrase|cut:'قبل ' }} — وقت مناسب لدعوته.</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </details>
+        </li>
+        {% endfor %}
+    </ul>
+
+    {% if page.has_other_pages %}
+    <nav class="pager" aria-label="صفحات العملاء">
+        {% if page.has_previous %}
+        <a class="btn" href="?page={{ page.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if active_segment %}&segment={{ active_segment }}{% endif %}{% if sort != 'last' %}&sort={{ sort }}{% endif %}">السابق</a>
+        {% endif %}
+        <span>صفحة {{ page.number }} من {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}
+        <a class="btn" href="?page={{ page.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}{% if active_segment %}&segment={{ active_segment }}{% endif %}{% if sort != 'last' %}&sort={{ sort }}{% endif %}">التالي</a>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <p class="empty">
+        {% if is_filtered %}
+        لا عميل يطابق هذا البحث. <a href="{% url 'restaurant:dashboard' %}">اعرض الكل</a>
+        {% else %}
+        ستظهر أسماء العملاء هنا بمجرد وصول أول حجز.
+        {% endif %}
+    </p>
+    {% endif %}
+</section>
+
+{% endblock %}

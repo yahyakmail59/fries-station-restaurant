@@ -1,0 +1,138 @@
+{% extends 'restaurant/panel_base.html' %}
+{% load l10n %}
+
+{% block title %}الكاشير{% endblock %}
+{% block page_title %}كاشير المطعم{% endblock %}
+{% block page_sub %}سجّل طلبات الطاولات لتدخل في المبيعات وإحصاءات الوجبات والعملاء.{% endblock %}
+
+{% block topbar_extra %}
+<a class="btn" href="{% url 'restaurant:panel_list' 'orders' %}">سجل الطلبات</a>
+{% endblock %}
+
+{% block content %}
+
+<section class="cashier-stats" aria-label="إحصاءات اليوم">
+    <article><span>زبائن داخل المطعم</span><b>{{ stats.inside_customers }}</b></article>
+    <article><span>زبائن الأونلاين</span><b>{{ stats.outside_customers }}</b></article>
+    <article><span>طلبات اليوم</span><b>{{ stats.orders_count }}</b></article>
+    <article><span>مبيعات اليوم</span><b>{{ stats.sales|floatformat:'-2' }} <small>{{ site.currency }}</small></b></article>
+</section>
+
+{% if created_order %}
+<section class="cashier-success" aria-labelledby="created-order-title">
+    <div>
+        <span>تم حفظ الطلب</span>
+        <h2 id="created-order-title">{{ created_order.code }}</h2>
+        <p>{{ created_order.customer_count }} زبون · {{ created_order.item_count }} صنف · {{ created_order.total|floatformat:'-2' }} {{ created_order.currency }}</p>
+    </div>
+    <a class="btn btn-solid" href="{% url 'restaurant:order_detail' created_order.token %}" target="_blank" rel="noopener">عرض الفاتورة</a>
+</section>
+{% endif %}
+
+<form method="post" class="cashier-form" data-cashier-form data-currency="{{ site.currency }}" novalidate>
+    {% csrf_token %}
+
+    <fieldset class="field-group cashier-customer">
+        <legend>بيانات الطاولة</legend>
+        <div class="fields">
+            <div class="field">
+                <label for="customer-name">اسم الزبون <small>(اختياري)</small></label>
+                <input id="customer-name" type="text" name="customer_name" value="{{ values.customer_name|default:'' }}" maxlength="150" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="customer-count">عدد الزبائن</label>
+                <input id="customer-count" type="number" name="customer_count" value="{{ values.customer_count|default:'1' }}" min="1" max="100" required>
+            </div>
+            <div class="field">
+                <label for="table-number">رقم الطاولة <small>(اختياري)</small></label>
+                <input id="table-number" type="text" name="table_number" value="{{ values.table_number|default:'' }}" maxlength="30" autocomplete="off">
+            </div>
+            <div class="field">
+                <label for="cashier-notes">ملاحظات <small>(اختياري)</small></label>
+                <textarea id="cashier-notes" name="notes" rows="2" maxlength="500">{{ values.notes|default:'' }}</textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <section class="cashier-menu" aria-labelledby="cashier-menu-title">
+        <div class="block-head">
+            <div>
+                <h2 id="cashier-menu-title">اختر الأصناف</h2>
+                <p class="block-meta">الأسعار تُقرأ من القائمة الحالية ولا يمكن تعديلها من الكاشير.</p>
+            </div>
+        </div>
+
+        {% regroup items by category as category_groups %}
+        {% for group in category_groups %}
+        <section class="cashier-category" aria-labelledby="cashier-category-{{ group.grouper.pk }}">
+            <h3 id="cashier-category-{{ group.grouper.pk }}">{{ group.grouper.name_ar }}</h3>
+            <div class="cashier-items">
+                {% for item in group.list %}
+                <article class="cashier-item">
+                    {% if item.image_src %}
+                    <img src="{{ item.image_src }}" alt="" width="120" height="90" loading="lazy">
+                    {% else %}
+                    <span class="cashier-item-placeholder" aria-hidden="true"></span>
+                    {% endif %}
+                    <div class="cashier-item-copy">
+                        <b>{{ item.name_ar }}</b>
+                        <small>{{ item.name_en }}</small>
+                        <strong>{{ item.price|floatformat:'-2' }} {{ site.currency }}</strong>
+                    </div>
+                    <div class="quantity-control">
+                        <button type="button" data-qty-step="-1" aria-label="إنقاص {{ item.name_ar }}">−</button>
+                        <input type="number"
+                               name="quantity_{{ item.pk }}"
+                               value="{{ item.selected_quantity }}"
+                               min="0" max="99" inputmode="numeric"
+                               data-cashier-qty data-price="{{ item.price|unlocalize }}"
+                               aria-label="كمية {{ item.name_ar }}">
+                        <button type="button" data-qty-step="1" aria-label="زيادة {{ item.name_ar }}">+</button>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </section>
+        {% empty %}
+        <p class="empty">لا توجد أصناف متاحة حاليًا. فعّل الأطباق من قسم القائمة أولًا.</p>
+        {% endfor %}
+    </section>
+
+    <div class="cashier-submit">
+        <div>
+            <span><b data-cashier-count>0</b> قطعة مختارة</span>
+            <strong><b data-cashier-total>0</b> {{ site.currency }}</strong>
+        </div>
+        <button type="submit" class="btn btn-solid">حفظ طلب الكاشير</button>
+    </div>
+</form>
+
+<section class="block" aria-labelledby="recent-cashier-orders">
+    <div class="block-head">
+        <h2 id="recent-cashier-orders">آخر طلبات الكاشير</h2>
+        <a class="btn btn-small" href="{% url 'restaurant:panel_list' 'orders' %}">عرض الكل</a>
+    </div>
+    {% if recent_orders %}
+    <div class="table-wrap">
+        <table class="data">
+            <thead><tr><th>الطلب</th><th>الطاولة</th><th>الزبائن</th><th>الإجمالي</th><th>الكاشير</th><th>الوقت</th></tr></thead>
+            <tbody>
+            {% for order in recent_orders %}
+            <tr>
+                <td><a href="{% url 'restaurant:order_detail' order.token %}" target="_blank" rel="noopener"><b>{{ order.code }}</b></a></td>
+                <td>{{ order.table_number|default:'—' }}</td>
+                <td>{{ order.customer_count }}</td>
+                <td>{{ order.total|floatformat:'-2' }} {{ order.currency }}</td>
+                <td>{% if order.cashier %}{{ order.cashier.get_full_name|default:order.cashier.username }}{% else %}—{% endif %}</td>
+                <td>{{ order.created_at|date:'H:i' }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty">لا توجد طلبات مسجلة من الكاشير بعد.</p>
+    {% endif %}
+</section>
+
+{% endblock %}

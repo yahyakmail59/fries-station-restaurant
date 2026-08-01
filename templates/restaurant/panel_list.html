@@ -1,0 +1,104 @@
+{% extends 'restaurant/panel_base.html' %}
+
+{% block title %}{{ section.title }}{% endblock %}
+{% block page_title %}{{ section.title }}{% endblock %}
+{% block page_sub %}{{ total }} عنصرًا{% if query %} مطابقًا للبحث{% endif %}{% endblock %}
+
+{% block topbar_extra %}
+{% if can_add %}
+<a class="btn btn-solid" href="{% url 'restaurant:panel_add' section_slug %}">+ {{ section.singular }} جديد</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{% if section.search %}
+<form method="get" class="filters" role="search">
+    <div class="search">
+        <label class="sr-only" for="q">ابحث في {{ section.title }}</label>
+        <input id="q" type="search" name="q" value="{{ query }}" placeholder="ابحث في {{ section.title }}" autocomplete="off">
+        <button type="submit" class="btn btn-solid">بحث</button>
+        {% if query %}<a class="btn" href="{% url 'restaurant:panel_list' section_slug %}">إلغاء</a>{% endif %}
+    </div>
+</form>
+{% endif %}
+
+{% if rows %}
+<div class="table-wrap">
+    <table class="data">
+        <thead>
+            <tr>
+                {% for header in headers %}<th scope="col">{{ header }}</th>{% endfor %}
+                <th scope="col"><span class="sr-only">إجراءات</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                {% for cell in row.cells %}
+                <td>
+                    {% if cell.type == 'image' %}
+                        {% if cell.url %}<img class="thumb" src="{{ cell.url }}" alt="" loading="lazy">
+                        {% else %}<span class="thumb thumb-empty" aria-label="بلا صورة"></span>{% endif %}
+                    {% elif cell.type == 'bool' %}
+                        {% if can_change %}
+                        <form method="post" action="{% url 'restaurant:panel_toggle' section_slug row.object.pk %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="field" value="{{ cell.field }}">
+                            {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                            {% if page.number > 1 %}<input type="hidden" name="page" value="{{ page.number }}">{% endif %}
+                            <button type="submit" class="switch{% if cell.on %} is-on{% endif %}"
+                                    aria-pressed="{% if cell.on %}true{% else %}false{% endif %}">
+                                <span aria-hidden="true"></span>
+                                <span class="sr-only">{% if cell.on %}مفعّل{% else %}متوقف{% endif %}</span>
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="switch{% if cell.on %} is-on{% endif %}" aria-hidden="true"><span></span></span>
+                        {% endif %}
+                    {% else %}
+                        {{ cell.value }}
+                    {% endif %}
+                </td>
+                {% endfor %}
+                <td class="row-end">
+                    {% if row.detail_url %}<a class="btn btn-small" href="{{ row.detail_url }}" target="_blank" rel="noopener">عرض</a>{% endif %}
+                    {% if can_change %}<a class="btn btn-small" href="{{ row.edit_url }}">تعديل</a>{% endif %}
+                    {% if can_delete %}
+                    <form method="post" action="{% url 'restaurant:panel_delete' section_slug row.object.pk %}"
+                          class="inline-form" data-confirm="حذف «{{ row.object }}» نهائيًا؟">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-small btn-danger">حذف</button>
+                    </form>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if page.has_other_pages %}
+<nav class="pager" aria-label="صفحات">
+    {% if page.has_previous %}
+    <a class="btn" href="?page={{ page.previous_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">السابق</a>
+    {% endif %}
+    <span>صفحة {{ page.number }} من {{ page.paginator.num_pages }}</span>
+    {% if page.has_next %}
+    <a class="btn" href="?page={{ page.next_page_number }}{% if query %}&q={{ query|urlencode }}{% endif %}">التالي</a>
+    {% endif %}
+</nav>
+{% endif %}
+
+{% else %}
+<p class="empty">
+    {% if query %}
+    لا نتائج لهذا البحث. <a href="{% url 'restaurant:panel_list' section_slug %}">اعرض الكل</a>
+    {% else %}
+    لا يوجد {{ section.singular }} بعد.
+    {% if can_add %}<a href="{% url 'restaurant:panel_add' section_slug %}">أضف الأول</a>{% endif %}
+    {% endif %}
+</p>
+{% endif %}
+
+{% endblock %}

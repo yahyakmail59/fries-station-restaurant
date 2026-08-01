@@ -1,0 +1,83 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static log b12_admin %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+<div id="content-main">
+
+    {% b12_admin_stats as stats %}
+    <div class="b12-stats">
+        {% for stat in stats %}
+        <div class="b12-stat{% if stat.urgent %} is-urgent{% endif %}">
+            <span class="latin">{{ stat.latin }}</span>
+            <b>{{ stat.value }}</b>
+            <span>{{ stat.label }}</span>
+            <small>{{ stat.note }}</small>
+            {% if stat.action %}<a href="{{ stat.url }}">{{ stat.action }} ←</a>{% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <p class="b12-section-title">MANAGE CONTENT</p>
+
+    {% if app_list %}
+    <div class="b12-apps">
+        {% for app in app_list %}
+        <section class="b12-app">
+            <h3><a href="{{ app.app_url }}">{{ app.name }}</a></h3>
+            <ul>
+                {% for model in app.models %}
+                <li>
+                    {% if model.admin_url %}
+                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                    {% else %}
+                    <span>{{ model.name }}</span>
+                    {% endif %}
+                    <span class="row-actions">
+                        {% if model.add_url %}<a href="{{ model.add_url }}">إضافة</a>{% endif %}
+                        {% if model.admin_url %}
+                        <a href="{{ model.admin_url }}">{% if model.view_only %}عرض{% else %}تعديل{% endif %}</a>
+                        {% endif %}
+                    </span>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>{% translate "You don't have permission to view or edit anything." %}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent actions' %}</h2>
+        {% get_admin_log 10 as admin_log for_user user %}
+        {% if not admin_log %}
+        <p class="help">لا إجراءات بعد.</p>
+        {% else %}
+        <ul class="actionlist">
+            {% for entry in admin_log %}
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                <span class="visually-hidden">{% if entry.is_addition %}{% translate 'Added:' %}{% elif entry.is_change %}{% translate 'Changed:' %}{% elif entry.is_deletion %}{% translate 'Deleted:' %}{% endif %}</span>
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                {{ entry.object_repr }}
+                {% else %}
+                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+                <br>
+                <span class="mini quiet">{% if entry.content_type %}{% filter capfirst %}{{ entry.content_type.name }}{% endfilter %}{% else %}{% translate 'Unknown content' %}{% endif %}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

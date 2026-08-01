@@ -1,0 +1,71 @@
+{% extends 'restaurant/panel_base.html' %}
+
+{% block title %}{% if instance and not is_settings %}تعديل{% elif is_settings %}الإعدادات{% else %}إضافة{% endif %} — {{ section.title }}{% endblock %}
+
+{% block page_title %}
+{% if is_settings %}{{ section.title }}
+{% elif instance %}تعديل {{ section.singular }}
+{% else %}{{ section.singular }} جديد{% endif %}
+{% endblock %}
+
+{% block page_sub %}
+{% if instance and not is_settings %}{{ instance }}{% elif is_settings %}كل ما يظهر للزوار على الصفحة الرئيسية.{% endif %}
+{% endblock %}
+
+{% block topbar_extra %}
+{% if not is_settings %}
+<a class="btn" href="{% url 'restaurant:panel_list' section_slug %}">رجوع للقائمة</a>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+
+<form method="post" enctype="multipart/form-data" class="record-form" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    {% for title, fields in groups %}
+    <fieldset class="field-group">
+        {% if title %}<legend>{{ title }}</legend>{% endif %}
+        <div class="fields">
+            {% for field in fields %}
+            <div class="field field-{{ field.field.widget.input_type|default:'text' }}{% if field.errors %} has-error{% endif %}">
+                <label for="{{ field.id_for_label }}">
+                    {{ field.label }}{% if field.field.required %} <i aria-hidden="true">*</i>{% endif %}
+                </label>
+                {{ field }}
+                {% if field.help_text %}<small class="hint">{{ field.help_text }}</small>{% endif %}
+                {% for error in field.errors %}<small class="error">{{ error }}</small>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </fieldset>
+    {% endfor %}
+
+    <div class="form-actions">
+        <button type="submit" class="btn btn-solid">حفظ</button>
+        {% if not is_settings %}
+        <a class="btn" href="{% url 'restaurant:panel_list' section_slug %}">إلغاء</a>
+        {% endif %}
+        {% if can_delete %}
+        <span class="spacer"></span>
+        {% endif %}
+    </div>
+</form>
+
+{% if can_delete %}
+<form method="post" action="{% url 'restaurant:panel_delete' section_slug instance.pk %}"
+      class="danger-zone" data-confirm="حذف «{{ instance }}» نهائيًا؟">
+    {% csrf_token %}
+    <div>
+        <b>حذف {{ section.singular }}</b>
+        <small>لا يمكن التراجع عن هذا الإجراء.</small>
+    </div>
+    <button type="submit" class="btn btn-danger">حذف نهائيًا</button>
+</form>
+{% endif %}
+
+{% endblock %}

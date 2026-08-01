@@ -1,0 +1,167 @@
+{% load static %}
+<!doctype html>
+<html lang="{{ language }}" dir="{% if language == 'ar' %}rtl{% else %}ltr{% endif %}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="{% if language == 'ar' %}{{ site.seo_description_ar|default:site.hero_text_ar }}{% else %}{{ site.seo_description_en|default:site.hero_text_en }}{% endif %}">
+    <meta name="theme-color" content="{{ site.background_color }}">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% if language == 'ar' %}{{ site.seo_title_ar|default:site.name_ar }}{% else %}{{ site.seo_title_en|default:site.name_en }}{% endif %}">
+    <meta property="og:description" content="{% if language == 'ar' %}{{ site.seo_description_ar|default:site.hero_text_ar }}{% else %}{{ site.seo_description_en|default:site.hero_text_en }}{% endif %}">
+    {% if og_image_url %}<meta property="og:image" content="{{ og_image_url }}">{% endif %}
+    {% if page_abs_url or home_abs_url %}
+    <meta property="og:url" content="{% if is_menu_page %}{{ page_abs_url }}{% if language == 'en' %}?lang=en{% endif %}{% elif language == 'en' %}{{ home_abs_url }}?lang=en{% else %}{{ home_abs_url }}{% endif %}">
+    <meta property="og:locale" content="{% if language == 'ar' %}ar_AR{% else %}en_US{% endif %}">
+    <link rel="canonical" href="{% if is_menu_page %}{{ page_abs_url }}{% if language == 'en' %}?lang=en{% endif %}{% elif language == 'en' %}{{ home_abs_url }}?lang=en{% else %}{{ home_abs_url }}{% endif %}">
+    <link rel="alternate" hreflang="ar" href="{% if is_menu_page %}{{ page_abs_url }}{% else %}{{ home_abs_url }}{% endif %}">
+    <link rel="alternate" hreflang="en" href="{% if is_menu_page %}{{ page_abs_url }}{% else %}{{ home_abs_url }}{% endif %}?lang=en">
+    <link rel="alternate" hreflang="x-default" href="{% if is_menu_page %}{{ page_abs_url }}{% else %}{{ home_abs_url }}{% endif %}">
+    {% endif %}
+    <link rel="icon" href="{% static 'restaurant/img/favicon.ico' %}" sizes="32x32">
+    <link rel="apple-touch-icon" href="{% static 'restaurant/img/apple-touch-icon.png' %}">
+    <title>{% block title %}{% if language == 'ar' %}{{ site.seo_title_ar|default:site.name_ar }}{% else %}{{ site.seo_title_en|default:site.name_en }}{% endif %}{% endblock %}</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Restaurant",
+      "name": "{% if language == 'ar' %}{{ site.name_ar|escapejs }}{% else %}{{ site.name_en|escapejs }}{% endif %}",
+      "alternateName": "{% if language == 'ar' %}{{ site.name_en|escapejs }}{% else %}{{ site.name_ar|escapejs }}{% endif %}",
+      "description": "{% if language == 'ar' %}{{ site.seo_description_ar|default:site.hero_text_ar|escapejs }}{% else %}{{ site.seo_description_en|default:site.hero_text_en|escapejs }}{% endif %}",
+      {% if home_abs_url %}"url": "{{ home_abs_url|escapejs }}",{% endif %}
+      {% if og_image_url %}"image": "{{ og_image_url|escapejs }}",{% endif %}
+      "telephone": "{{ site.tel_phone|escapejs }}",
+      "servesCuisine": ["Middle Eastern", "International"],
+      "priceRange": "$$",
+      {% if site.instagram_url or site.facebook_url %}"sameAs": [{% if site.instagram_url %}"{{ site.instagram_url|escapejs }}"{% if site.facebook_url %}, {% endif %}{% endif %}{% if site.facebook_url %}"{{ site.facebook_url|escapejs }}"{% endif %}],{% endif %}
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "{% if language == 'ar' %}{{ site.address_ar|escapejs }}{% else %}{{ site.address_en|escapejs }}{% endif %}",
+        "addressCountry": "PS"
+      }
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
+    <style>
+        :root {
+            --brand-red: {{ site.primary_color|default:'#E30613' }};
+            --brand-gold: {{ site.gold_color|default:'#D4AF37' }};
+            --page-bg: {{ site.background_color|default:'#050505' }};
+            --surface: {{ site.surface_color|default:'#111111' }};
+            --whatsapp: {{ site.whatsapp_color|default:'#25D366' }};
+        }
+    </style>
+    <script src="{% static 'restaurant/js/lucide-slim.js' %}" defer></script>
+    <script src="{% static 'restaurant/js/main.js' %}" defer></script>
+</head>
+<body{% if is_menu_page %} class="menu-page-body"{% endif %} data-lang="{{ language }}" data-whatsapp="{{ site.whatsapp_number }}" data-currency="{{ site.currency }}"
+      data-order-url="{% url 'restaurant:create_order' %}">
+{# The order request is a POST, so it needs a token even though it carries JSON. #}
+<form id="csrf-holder" hidden>{% csrf_token %}</form>
+<a class="skip-link" href="#main">{% if language == 'ar' %}انتقل إلى المحتوى{% else %}Skip to content{% endif %}</a>
+
+<header class="site-header" id="top">
+    <div class="page-shell header-inner">
+        <a class="brand" href="{% if is_menu_page %}{% url 'restaurant:home' %}{% else %}#top{% endif %}" aria-label="{{ site.name_en }}">
+            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/b12-logo-clean.jpg' %}{% endif %}" alt="{{ site.name_en }}" width="890" height="810">
+        </a>
+
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"
+                data-open-label="{% if language == 'ar' %}فتح القائمة{% else %}Open menu{% endif %}"
+                data-close-label="{% if language == 'ar' %}إغلاق القائمة{% else %}Close menu{% endif %}"
+                aria-label="{% if language == 'ar' %}فتح القائمة{% else %}Open menu{% endif %}">
+            <i class="nav-icon-menu" data-lucide="menu" aria-hidden="true"></i>
+            <i class="nav-icon-close" data-lucide="x" aria-hidden="true"></i>
+        </button>
+
+        <nav id="main-nav" class="main-nav" aria-label="{% if language == 'ar' %}التنقل الرئيسي{% else %}Primary navigation{% endif %}">
+            {% if is_menu_page %}
+            <a href="{% url 'restaurant:home' %}"><b>{% if language == 'ar' %}الرئيسية{% else %}Home{% endif %}</b><small>{% if language == 'ar' %}HOME{% else %}الرئيسية{% endif %}</small></a>
+            <a class="active" href="#menu-top" aria-current="location"><b>{% if language == 'ar' %}المنيو{% else %}Menu{% endif %}</b><small>{% if language == 'ar' %}MENU{% else %}المنيو{% endif %}</small></a>
+            <a href="#menu-catalog"><b>{% if language == 'ar' %}كل الأصناف{% else %}All dishes{% endif %}</b><small>{% if language == 'ar' %}ALL DISHES{% else %}كل الأصناف{% endif %}</small></a>
+            {% if best_sellers %}<a href="#menu-best"><b>{% if language == 'ar' %}الأكثر طلبًا{% else %}Best sellers{% endif %}</b><small>{% if language == 'ar' %}BEST SELLERS{% else %}الأكثر طلبًا{% endif %}</small></a>{% endif %}
+            {% if offers %}<a href="#menu-offers"><b>{% if language == 'ar' %}العروض{% else %}Offers{% endif %}</b><small>{% if language == 'ar' %}OFFERS{% else %}العروض{% endif %}</small></a>{% endif %}
+            <a href="{% url 'restaurant:home' %}#contact"><b>{% if language == 'ar' %}اتصل بنا{% else %}Contact{% endif %}</b><small>{% if language == 'ar' %}CONTACT{% else %}اتصل بنا{% endif %}</small></a>
+            {% else %}
+            <a class="active" href="#hero" aria-current="location"><b>{% if language == 'ar' %}الرئيسية{% else %}Home{% endif %}</b><small>{% if language == 'ar' %}HOME{% else %}الرئيسية{% endif %}</small></a>
+            {% if site.show_featured %}<a href="#menu"><b>{% if language == 'ar' %}القائمة{% else %}Menu{% endif %}</b><small>{% if language == 'ar' %}MENU{% else %}القائمة{% endif %}</small></a>{% endif %}
+            {% if site.show_featured and best_sellers %}<a href="#best-sellers"><b>{% if language == 'ar' %}الأكثر طلبًا{% else %}Best sellers{% endif %}</b><small>{% if language == 'ar' %}BEST SELLERS{% else %}الأكثر طلبًا{% endif %}</small></a>{% elif site.show_featured %}<a href="#featured"><b>{% if language == 'ar' %}الأطباق{% else %}Dishes{% endif %}</b><small>{% if language == 'ar' %}DISHES{% else %}الأطباق{% endif %}</small></a>{% endif %}
+            {% if site.show_offers %}<a href="#offers"><b>{% if language == 'ar' %}العروض{% else %}Offers{% endif %}</b><small>{% if language == 'ar' %}OFFERS{% else %}العروض{% endif %}</small></a>{% endif %}
+            {% if site.show_reservation %}<a href="#contact"><b>{% if language == 'ar' %}اتصل بنا{% else %}Contact{% endif %}</b><small>{% if language == 'ar' %}CONTACT{% else %}اتصل بنا{% endif %}</small></a>{% endif %}
+            {% if site.show_about %}<a href="#about"><b>{% if language == 'ar' %}من نحن{% else %}About us{% endif %}</b><small>{% if language == 'ar' %}ABOUT US{% else %}من نحن{% endif %}</small></a>{% endif %}
+            {% endif %}
+        </nav>
+
+        <div class="header-actions">
+            <div class="language-switch" role="group" aria-label="{% if language == 'ar' %}اختيار اللغة{% else %}Choose language{% endif %}">
+                <a href="{% if is_menu_page %}{% url 'restaurant:menu' %}{% else %}{% url 'restaurant:home' %}{% endif %}?lang=ar{% if is_menu_page and active_category != 'all' %}&amp;category={{ active_category }}{% endif %}" class="{% if language == 'ar' %}active{% endif %}">AR</a><span>|</span><a href="{% if is_menu_page %}{% url 'restaurant:menu' %}{% else %}{% url 'restaurant:home' %}{% endif %}?lang=en{% if is_menu_page and active_category != 'all' %}&amp;category={{ active_category }}{% endif %}" class="{% if language == 'en' %}active{% endif %}">EN</a>
+            </div>
+            <button class="header-whatsapp js-open-cart" type="button" aria-label="{% if language == 'ar' %}عرض سلة الطلب{% else %}View order cart{% endif %}">
+                <i data-lucide="shopping-cart"></i>
+                <span><b>{% if language == 'ar' %}{{ site.order_cta_ar }}{% else %}{{ site.order_cta_en }}{% endif %}</b><small>{% if language == 'ar' %}{{ site.order_cta_en }}{% else %}{{ site.order_cta_ar }}{% endif %}</small></span>
+                <em class="cart-count">0</em>
+            </button>
+        </div>
+    </div>
+</header>
+
+{% if messages %}
+<div class="messages page-shell" role="status">
+    {% for message in messages %}<div class="message {{ message.tags }}">{{ message }}</div>{% endfor %}
+</div>
+{% endif %}
+
+<main id="main">{% block content %}{% endblock %}</main>
+
+<div class="cart-feedback" id="cart-feedback" role="status" aria-live="polite"></div>
+
+<button class="floating-whatsapp js-open-cart" type="button" aria-label="{% if language == 'ar' %}عرض سلة الطلب{% else %}View order cart{% endif %}">
+    <i data-lucide="shopping-cart"></i><span class="floating-count">0</span>
+</button>
+
+<aside class="order-drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="order-title" inert hidden>
+    <div class="drawer-backdrop js-close-cart"></div>
+    <section class="drawer-panel">
+        <div class="drawer-head">
+            <div><span class="mini-en">WHATSAPP ORDER</span><h2 id="order-title">{% if language == 'ar' %}طلبك الحالي{% else %}Your current order{% endif %}</h2></div>
+            <button class="icon-btn js-close-cart" type="button" aria-label="{% if language == 'ar' %}إغلاق{% else %}Close{% endif %}"><i data-lucide="x"></i></button>
+        </div>
+        <button class="clear-cart-btn hidden" id="clear-cart" type="button"><i data-lucide="trash-2"></i>{% if language == 'ar' %}مسح الطلب{% else %}Clear order{% endif %}</button>
+        <div class="drawer-items" id="cart-items"></div>
+        <div class="drawer-empty" id="cart-empty">
+            <i data-lucide="shopping-bag"></i>
+            <p>{% if language == 'ar' %}لم تضف أي طبق بعد.{% else %}No dishes added yet.{% endif %}</p>
+            {% if site.show_featured %}
+            <a href="{% url 'restaurant:menu' %}" class="btn btn-outline js-close-cart">{% if language == 'ar' %}{{ site.menu_cta_ar }}{% else %}{{ site.menu_cta_en }}{% endif %}</a>
+            {% else %}
+            <button type="button" class="btn btn-outline js-close-cart">{% if language == 'ar' %}إغلاق{% else %}Close{% endif %}</button>
+            {% endif %}
+        </div>
+        <div class="drawer-summary">
+            <div class="total-row"><span>{% if language == 'ar' %}الإجمالي التقريبي{% else %}Estimated total{% endif %}</span><strong id="cart-total">0 {{ site.currency }}</strong></div>
+            <fieldset class="fulfillment-options">
+                <legend>{% if language == 'ar' %}طريقة استلام الطلب{% else %}Order method{% endif %}</legend>
+                <label><input type="radio" name="fulfillment" value="pickup" checked><span><i data-lucide="store"></i>{% if language == 'ar' %}استلام من المطعم{% else %}Pickup{% endif %}</span></label>
+                <label><input type="radio" name="fulfillment" value="delivery"><span><i data-lucide="bike"></i>{% if language == 'ar' %}ديليفري{% else %}Delivery{% endif %}</span></label>
+            </fieldset>
+            <div class="delivery-fields hidden" id="delivery-fields">
+                <label class="field-label" for="order-name">{% if language == 'ar' %}اسم صاحب الطلب{% else %}Customer name{% endif %}</label>
+                <input id="order-name" type="text" autocomplete="name">
+                <label class="field-label" for="order-phone">{% if language == 'ar' %}رقم الجوال{% else %}Phone number{% endif %}</label>
+                <input id="order-phone" type="tel" autocomplete="tel" inputmode="tel">
+                <label class="field-label" for="order-address">{% if language == 'ar' %}عنوان التوصيل{% else %}Delivery address{% endif %}</label>
+                <textarea id="order-address" rows="2" autocomplete="street-address"></textarea>
+            </div>
+            <label class="field-label" for="order-notes">{% if language == 'ar' %}ملاحظات الطلب{% else %}Order notes{% endif %}</label>
+            <textarea id="order-notes" rows="3"></textarea>
+            <button class="btn btn-whatsapp full-width" id="send-whatsapp" type="button"><i data-lucide="send"></i>{% if language == 'ar' %}إرسال عبر واتساب{% else %}Send on WhatsApp{% endif %}</button>
+        </div>
+    </section>
+</aside>
+</body>
+</html>
