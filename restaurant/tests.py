@@ -253,6 +253,15 @@ class LandingPageTests(TestCase):
         self.assertContains(sitemap, '<urlset')
         self.assertContains(sitemap, '/menu/')
 
+    @override_settings(SITE_NOINDEX=True)
+    def test_staging_mode_blocks_indexing_in_headers_and_robots(self):
+        home = self.client.get(reverse('restaurant:home'))
+        robots = self.client.get(reverse('restaurant:robots'))
+
+        self.assertEqual(home['X-Robots-Tag'], 'noindex, nofollow')
+        self.assertContains(robots, 'Disallow: /')
+        self.assertNotContains(robots, 'Sitemap:')
+
     def test_standalone_menu_uses_the_live_catalog_and_cart(self):
         category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(

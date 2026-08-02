@@ -1,0 +1,31 @@
+"""Copy the relevant lines into the WSGI file in PythonAnywhere's Web tab.
+
+This tracked example contains placeholders only. Put the real secret values in
+the server-side WSGI file; never commit them to this repository.
+"""
+import os
+import sys
+
+
+PROJECT_HOME = '/home/<pythonanywhere-username>/fries-station-restaurant'
+if PROJECT_HOME not in sys.path:
+    sys.path.insert(0, PROJECT_HOME)
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+os.environ.setdefault('DJANGO_DEBUG', '0')
+os.environ.setdefault('DJANGO_SECRET_KEY', '<replace-on-server>')
+os.environ.setdefault(
+    'DJANGO_ALLOWED_HOSTS',
+    '<pythonanywhere-username>.pythonanywhere.com',
+)
+os.environ.setdefault(
+    'DJANGO_CSRF_TRUSTED_ORIGINS',
+    'https://<pythonanywhere-username>.pythonanywhere.com',
+)
+
+# Keep 1 on staging. Change to 0 only when the production domain is ready.
+os.environ.setdefault('DJANGO_SITE_NOINDEX', '1')
+
+from django.core.wsgi import get_wsgi_application
+
+application = get_wsgi_application()

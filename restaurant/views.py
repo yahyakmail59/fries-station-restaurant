@@ -250,6 +250,11 @@ def _notify_new_reservation(reservation):
 
 @require_GET
 def robots_txt(request):
+    if settings.SITE_NOINDEX:
+        return HttpResponse(
+            'User-agent: *\nDisallow: /',
+            content_type='text/plain',
+        )
     sitemap_url = request.build_absolute_uri(reverse('restaurant:sitemap'))
     lines = [
         'User-agent: *',

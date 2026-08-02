@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'restaurant.middleware.SiteNoIndexMiddleware',
     # Compress dynamic HTML/JSON responses. Static assets are compressed by
     # collectstatic and served directly by PythonAnywhere.
     'django.middleware.gzip.GZipMiddleware',
@@ -184,3 +185,7 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE', str(5 * 1024 * 1024)))
 DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE', str(8 * 1024 * 1024)))
+
+# Enable on staging so search engines cannot index the temporary environment.
+# Production leaves this off and uses the normal robots/sitemap responses.
+SITE_NOINDEX = os.environ.get('DJANGO_SITE_NOINDEX', '0') == '1'
