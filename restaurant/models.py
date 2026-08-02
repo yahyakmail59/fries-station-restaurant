@@ -134,6 +134,7 @@ class RestaurantSettings(TimeStampedModel):
     currency = models.CharField(max_length=20, default='₪', verbose_name='رمز العملة')
     instagram_url = models.URLField(blank=True, verbose_name='رابط إنستغرام')
     facebook_url = models.URLField(blank=True, verbose_name='رابط فيسبوك')
+    tiktok_url = models.URLField(blank=True, verbose_name='رابط تيك توك')
 
     show_about = models.BooleanField(default=True, verbose_name='إظهار قسم من نحن')
     show_categories = models.BooleanField(default=True, verbose_name='إظهار أقسام القائمة')
@@ -209,7 +210,10 @@ class RestaurantSettings(TimeStampedModel):
     def hero_image_mobile_src(self):
         if self.hero_image:
             return ''
-        if self.hero_image_url.endswith('/hero-b12.webp'):
+        # Any hero served from our own static folder has a -960 twin beside it.
+        # Keying this to one filename meant a renamed hero silently lost its
+        # phone-sized variant.
+        if self.hero_image_url.startswith('/static/') and self.hero_image_url.endswith('.webp'):
             return self.hero_image_url.removesuffix('.webp') + '-960.webp'
         return ''
 

@@ -241,7 +241,7 @@ SETTINGS_GROUPS = [
     ('واجهة الصفحة', ('hero_title_ar', 'hero_title_en', 'hero_text_ar', 'hero_text_en',
                       'hero_image', 'hero_image_url', 'og_image', 'og_image_url')),
     ('التواصل', ('whatsapp_number', 'phone', 'email', 'address_ar', 'address_en',
-                 'hours_ar', 'hours_en', 'instagram_url', 'facebook_url')),
+                 'hours_ar', 'hours_en', 'instagram_url', 'facebook_url', 'tiktok_url')),
     ('ضوابط الحجز', ('reservation_open_time', 'reservation_close_time',
                      'reservation_slot_minutes', 'max_reservations_per_slot',
                      'max_reservation_days_ahead')),

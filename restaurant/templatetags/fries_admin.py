@@ -13,7 +13,7 @@ register = template.Library()
 
 
 @register.simple_tag
-def b12_admin_stats():
+def fries_admin_stats():
     """Four counts that tell a manager whether anything needs doing."""
     today = timezone.localdate()
 

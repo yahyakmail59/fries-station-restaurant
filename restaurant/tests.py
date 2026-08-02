@@ -390,21 +390,21 @@ class LandingPageTests(TestCase):
 
     def test_social_title_and_branded_buttons_link_to_social_profiles(self):
         site = RestaurantSettings.load()
-        site.instagram_url = 'https://www.instagram.com/b12restaurant/'
-        site.facebook_url = 'https://www.facebook.com/b12restaurant/'
+        site.instagram_url = 'https://www.instagram.com/friesstation.rest/'
+        site.facebook_url = 'https://www.facebook.com/friesstation.rest/'
         site.save()
         response = self.client.get(reverse('restaurant:home'))
         self.assertContains(
             response,
-            'class="social-title" href="https://www.instagram.com/b12restaurant/"',
+            'class="social-title" href="https://www.instagram.com/friesstation.rest/"',
         )
         self.assertContains(
             response,
-            'class="social-facebook" href="https://www.facebook.com/b12restaurant/"',
+            'class="social-facebook" href="https://www.facebook.com/friesstation.rest/"',
         )
         self.assertContains(
             response,
-            'class="social-instagram" href="https://www.instagram.com/b12restaurant/"',
+            'class="social-instagram" href="https://www.instagram.com/friesstation.rest/"',
         )
         self.assertContains(response, 'class="social-whatsapp js-open-cart"')
 
@@ -820,7 +820,7 @@ class AdminSkinTests(TestCase):
     def test_the_start_page_shows_the_stat_tiles(self):
         response = self.client.get(reverse('admin:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'class="b12-stats"')
+        self.assertContains(response, 'class="fs-stats"')
         self.assertContains(response, 'حجوزات الليلة')
         self.assertContains(response, 'تنتظر ردًا')
 
@@ -836,9 +836,9 @@ class AdminSkinTests(TestCase):
     def test_every_admin_page_links_to_the_customer_dashboard(self):
         response = self.client.get(reverse('admin:restaurant_reservation_changelist'))
         self.assertContains(response, reverse('restaurant:dashboard'))
-        self.assertContains(response, 'b12-desk-link')
+        self.assertContains(response, 'fs-desk-link')
 
-    def test_the_admin_loads_the_b12_stylesheet(self):
+    def test_the_admin_loads_the_brand_stylesheet(self):
         response = self.client.get(reverse('admin:index'))
         self.assertContains(response, 'restaurant/css/admin.css')
 

@@ -201,7 +201,7 @@ def create_reservation(request):
     _notify_new_reservation(reservation)
     if language == 'ar':
         text = (
-            'مرحبًا B12، أرسلت طلب حجز طاولة عبر الموقع:\n'
+            f'مرحبًا {site.name_ar}، أرسلت طلب حجز طاولة عبر الموقع:\n'
             f'الاسم: {reservation.full_name}\n'
             f'الهاتف: {reservation.phone}\n'
             f'التاريخ: {reservation.date}\n'
@@ -212,7 +212,7 @@ def create_reservation(request):
         )
     else:
         text = (
-            'Hello B12, I submitted a table reservation request on the website:\n'
+            f'Hello {site.name_en}, I submitted a table reservation request on the website:\n'
             f'Name: {reservation.full_name}\n'
             f'Phone: {reservation.phone}\n'
             f'Date: {reservation.date}\n'

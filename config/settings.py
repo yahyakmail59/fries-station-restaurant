@@ -144,7 +144,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION', 'b12-restaurant'),
+        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION', 'fries-station'),
         'TIMEOUT': int(os.environ.get('DJANGO_CACHE_TIMEOUT', '300')),
         'OPTIONS': {
             'MAX_ENTRIES': int(os.environ.get('DJANGO_CACHE_MAX_ENTRIES', '2000')),

@@ -893,7 +893,7 @@ textarea { resize: vertical; }
 }
 .footer-socials svg { width: 17px; height: 17px; }
 .footer-socials .social-facebook { background: #1877F2; border-color: #1877F2; }
-.footer-socials .social-instagram { background: linear-gradient(135deg, #F9CE34 0%, #EE2A7B 48%, #6228D7 100%); border-color: #DD2A7B; }
+.footer-socials .social-tiktok, .social-instagram { background: linear-gradient(135deg, #F9CE34 0%, #EE2A7B 48%, #6228D7 100%); border-color: #DD2A7B; }
 .footer-socials .social-whatsapp { background: var(--status-whatsapp); border-color: var(--status-whatsapp); color: var(--text-on-warm); }
 .footer-socials a:hover, .footer-socials button:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .footer-socials a:focus-visible, .footer-socials button:focus-visible { outline: 3px solid var(--focus-ring-invert); outline-offset: 3px; }

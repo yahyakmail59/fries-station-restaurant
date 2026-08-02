@@ -237,7 +237,7 @@ def _whatsapp_message(order, order_url, language):
     """
     if language == 'en':
         return '\n'.join([
-            'Hello B12, I placed an order on the website.',
+            f'Hello {order.restaurant_name or "Fries Station"}, I placed an order on the website.',
             f'Order number: {order.code}',
             'View order:',
             order_url,

@@ -129,7 +129,7 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
             'max_reservation_days_ahead',
         )}),
         ('التواصل الاجتماعي والتذييل', {'fields': (
-            'instagram_url', 'facebook_url',
+            'instagram_url', 'facebook_url', 'tiktok_url',
             ('footer_text_ar', 'footer_text_en'),
         )}),
         ('SEO والمشاركة', {'classes': ('collapse',), 'fields': (

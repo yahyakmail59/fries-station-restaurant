@@ -31,9 +31,9 @@
       {% if home_abs_url %}"url": "{{ home_abs_url|escapejs }}",{% endif %}
       {% if og_image_url %}"image": "{{ og_image_url|escapejs }}",{% endif %}
       "telephone": "{{ site.tel_phone|escapejs }}",
-      "servesCuisine": ["Middle Eastern", "International"],
+      "servesCuisine": ["Fast Food", "Fried Chicken", "French Fries"],
       "priceRange": "$$",
-      {% if site.instagram_url or site.facebook_url %}"sameAs": [{% if site.instagram_url %}"{{ site.instagram_url|escapejs }}"{% if site.facebook_url %}, {% endif %}{% endif %}{% if site.facebook_url %}"{{ site.facebook_url|escapejs }}"{% endif %}],{% endif %}
+      {% if site.instagram_url or site.facebook_url or site.tiktok_url %}"sameAs": [{% spaceless %}{% if site.instagram_url %}"{{ site.instagram_url|escapejs }}"{% endif %}{% if site.facebook_url %}{% if site.instagram_url %}, {% endif %}"{{ site.facebook_url|escapejs }}"{% endif %}{% if site.tiktok_url %}{% if site.instagram_url or site.facebook_url %}, {% endif %}"{{ site.tiktok_url|escapejs }}"{% endif %}{% endspaceless %}],{% endif %}
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "{% if language == 'ar' %}{{ site.address_ar|escapejs }}{% else %}{{ site.address_en|escapejs }}{% endif %}",

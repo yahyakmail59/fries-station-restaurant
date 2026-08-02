@@ -91,7 +91,7 @@
 | C23 | إسقاط غير المتاح | `POST /order/` | `views_order.py:132` | `is_available=False` يُسقط بصمت | لا شيء | الطلب يتم بالباقي | كله غير متاح ← 409 | عام | `test_an_unavailable_dish_is_dropped` · `test_an_order_of_only_unavailable_dishes_is_refused` | ⬜ |
 | C24 | حدود الحجم | `POST /order/` | `views_order.py:27-28` | 40 سطرًا كحد أقصى، الكمية 1..99 | لا شيء | ضمن الحد ← نجاح | تجاوز ← 400 / إسقاط | عام | `test_quantities_outside_the_allowed_range_are_dropped` | ⬜ |
 | C25 | رفض المدخلات التالفة | `POST /order/` | `views_order.py:62-71` | JSON غير صالح ← 400؛ سلة فارغة ← 400؛ GET ← 405 | لا شيء | — | رسائل واضحة | عام | `test_malformed_json_is_refused` · `test_an_empty_cart_is_refused` · `test_a_get_is_not_allowed` | ⬜ |
-| C26 | **رمز الطلب** | — | `models.Order._new_code` | 4 محارف من أبجدية بلا `I O 0 1`؛ البادئة `B12-` — **تُغيَّر إلى بادئة فرايز ستيشن (م12)** | **تغيير البادئة مسموح ومطلوب؛ الأبجدية والطول يبقيان** | فريد عبر آلاف الطلبات | تصادم متكرر ← رمز أطول | عام | `test_codes_are_unique_across_many_orders` · `test_the_code_avoids_characters_that_are_misread_aloud` | ⬜ |
+| C26 | **رمز الطلب** | — | `models.Order._new_code` | 4 محارف من أبجدية بلا `I O 0 1`؛ البادئة من `Order.CODE_PREFIX` = `FS-` | الأبجدية والطول يبقيان | فريد عبر آلاف الطلبات | تصادم متكرر ← رمز أطول | عام | `test_codes_are_unique_across_many_orders` · `test_the_code_avoids_characters_that_are_misread_aloud` | ✅ |
 | C27 | **خصوصية رابط الطلب** | `GET /o/<token>/` | `models.Order.token`, `views_order.order_detail` | `secrets.token_urlsafe(12)` منفصل عن الرمز القصير؛ تخمين الرمز لا يفتح الطلب | **ممنوع المساس** | التوكن الصحيح ← 200 | رمز قصير في المسار ← 404 | من يملك التوكن | `OrderUrlPrivacyTests` (6 اختبارات) | ⬜ |
 | C28 | صفحة الطلب للقراءة فقط | `GET /o/<token>/` | `order_detail.html` | تعرض الإجمالي من الخادم؛ الموظف يرى إشارة إدارية لكنه لا يعدّل هنا | مظهر فقط | الإجمالي مطابق | توكن مجهول ← 404 | من يملك التوكن | `test_the_order_page_shows_the_server_total` | ⬜ |
 | C29 | منع فهرسة صفحة الطلب | — | `order_detail.html`, `robots.txt` | `noindex` + `Disallow: /o/` | لا شيء | خارج محركات البحث | — | — | `test_the_order_page_asks_not_to_be_indexed` · `test_robots_keeps_order_pages_out_of_search` | ⬜ |
@@ -155,7 +155,7 @@
 | A19 | الكاشير — الوصول | `/dashboard/cashier/` | `views_cashier.cashier` | يتطلب `add_order` فوق `staff` | لا شيء | الصفحة تفتح | بلا الصلاحية ← رفض | `add_order` | `test_cashier_page_requires_add_order_permission` | ⬜ |
 | A20 | الكاشير — إنشاء طلب | `POST /dashboard/cashier/` | `views_cashier` | `source='cashier'`, `fulfillment='dine_in'`, `status='confirmed'`؛ **الأسعار من قاعدة البيانات**؛ يسجّل الموظف | **ممنوع المساس بالتسعير** | يُحفظ ويحوّل بـ `?created=<token>` | عدد زبائن خارج 1..100 أو سلة فارغة ← 400 مع الاحتفاظ بالمدخلات | `add_order` | `test_cashier_order_is_saved_and_priced_from_the_database` | ⬜ |
 | A21 | إحصاءات اليوم | `/dashboard/cashier/` | `views_cashier._today_stats` | زبائن داخل/خارج + عدد الطلبات + المبيعات، مستثنيًا الملغاة | مظهر فقط | الأرقام مطابقة | لا طلبات ← أصفار | `add_order` | `test_cashier_dashboard_counts_inside_and_online_customers` | ⬜ |
-| A22 | Django Admin — الإحصاءات | `/admin/` | `templatetags/b12_admin.py`, `templates/admin/index.html` | 4 بطاقات: الليلة، تنتظر ردًا، العملاء، الأطباق — **الملف والوسم يُعاد تسميتهما (م12)** | **إعادة التسمية مسموحة ومطلوبة** | البطاقات تظهر | موظف بلا صلاحيات ← صفحة تعمل | staff | `AdminSkinTests` (5) | ⬜ |
+| A22 | Django Admin — الإحصاءات | `/admin/` | `templatetags/fries_admin.py`, `templates/admin/index.html` | 4 بطاقات: الليلة، تنتظر ردًا، العملاء، الأطباق | — | البطاقات تظهر | موظف بلا صلاحيات ← صفحة تعمل | staff | `AdminSkinTests` (5) | ✅ |
 | A23 | Admin — منع إنشاء طلب يدويًا | `/admin/` | `OrderAdmin.has_add_permission` | `False` — الطلبات تُنشأ من الموقع أو الكاشير فقط | **ممنوع المساس** | — | — | — | فحص الإدارة | ⬜ |
 | A24 | Admin — أسطر الطلب للقراءة | `/admin/` | `OrderLineInline` | كل الحقول `readonly`، لا إضافة ولا حذف | **ممنوع المساس** | — | — | — | فحص الإدارة | ⬜ |
 | A25 | Admin — الإعدادات سجل واحد | `/admin/` | `RestaurantSettingsAdmin` | لا إضافة إن وُجد سجل، ولا حذف إطلاقًا | لا شيء | — | — | — | فحص الإدارة | ⬜ |
@@ -174,7 +174,7 @@
 | S4 | robots.txt | `/robots.txt` | `views.robots_txt` | يمنع `/admin/` و`/dashboard/` و`/o/` ويعلن الـsitemap | لا شيء | `test_robots_txt_and_sitemap_xml` · `test_robots_txt_keeps_the_dashboard_out_of_search` | ⬜ |
 | S5 | sitemap.xml | `/sitemap.xml` | `views.sitemap_xml` | الرئيسية والقائمة مع بدائل اللغة | لا شيء | `test_robots_txt_and_sitemap_xml` | ⬜ |
 | S6 | صور محلية صالحة | لوحة الإعدادات | `models.image_source_validator` | يقبل رابط HTTP(S) أو مسار `/static/` `/media/`؛ يرفض `..` وبيانات الدخول في الرابط | لا شيء | `test_relative_static_image_paths_are_valid_in_admin_forms` | ⬜ |
-| S7 | صورة Hero للهاتف | `/` | `models.hero_image_mobile_src` | **مربوط باسم ملف `hero-b12.webp` — يُعمَّم في م9** | **التعميم مطلوب وإلا اختفت النسخة المحمولة بصمت** | يدوي (م14) | ⬜ |
+| S7 | صورة Hero للهاتف | `/` | `models.hero_image_mobile_src` | معمَّم: أي Hero من `/static/` بامتداد `.webp` له توأم `-960` | — | يدوي (م14) | ✅ |
 | S8 | ترويسات الأمان | كل الصفحات | `config/settings.py` | `X_FRAME_OPTIONS: DENY`, `SECURE_REFERRER_POLICY`, كوكيز آمنة خارج التطوير | لا شيء | `manage.py check --deploy` | ⬜ |
 | S9 | رفض الإقلاع بلا مفتاح سري | — | `settings.py:16-19` | `DEBUG=0` بلا `DJANGO_SECRET_KEY` ← `ImproperlyConfigured` | **ممنوع المساس** | يدوي | ⬜ |
 
@@ -246,9 +246,11 @@ Reservation.status  new contacted confirmed cancelled
 |---|---|---|---|
 | مفتاح localStorage | `b12-whatsapp-cart` | `fries-station-cart` | ✅ تم |
 | بادئة رمز الطلب | `B12-` | `FS-` عبر `Order.CODE_PREFIX` | ✅ تم |
-| ملف ووسم إحصاءات الإدارة | `b12_admin.py` / `b12_admin_stats` | تسمية فرايز ستيشن | 12 |
-| مراجع تباين الألوان | مبنية على `#050505` / سطح داكن | مبنية على هوية فرايز ستيشن | 6 و10 |
-| `hero_image_mobile_src` | مربوط بـ `hero-b12.webp` | منطق معمَّم | 9 |
-| `servesCuisine` | `Middle Eastern, International` | مطبخ فرايز ستيشن | 11 |
-| اسم الكاش | `b12-restaurant` | `fries-station` | 12 |
-| مجلد الصور | `static/restaurant/img/v3/` | `static/restaurant/img/fries-station/` | 8 |
+| ملف ووسم إحصاءات الإدارة | `b12_admin.py` / `b12_admin_stats` | `fries_admin.py` / `fries_admin_stats` | ✅ تم |
+| مراجع تباين الألوان | مبنية على `#050505` / سطح داكن | كل لون مقابل النص الذي يحمله | ✅ تم |
+| `hero_image_mobile_src` | مربوط بـ `hero-b12.webp` | منطق معمَّم لأي مسار static | ✅ تم |
+| `servesCuisine` | `Middle Eastern, International` | `Fast Food, Fried Chicken, French Fries` | ✅ تم |
+| اسم الكاش | `b12-restaurant` | `fries-station` | ✅ تم |
+| متغيرات وأصناف CSS للإدارة | `--b12-*` / `.b12-*` | `--fs-*` / `.fs-*` | ✅ تم |
+| تحية واتساب للحجز والطلب | نص ثابت باسم B12 | تُقرأ من اسم المطعم في الإعدادات | ✅ تم |
+| مجلد الصور | `static/restaurant/img/v3/` | `static/restaurant/img/fries-station/` | ✅ تم |

@@ -217,10 +217,27 @@ class Command(BaseCommand):
         site.hero_image_url = f'{IMG}/hero/hero-fries-station.webp'
         site.og_image_url = f'{IMG}/branding/og-fries-station.webp'
         # The restaurant's own public pages, confirmed by the owner.
+        # Contact details as the restaurant publishes them on its own pages.
         site.facebook_url = 'https://www.facebook.com/FriesStation.Rest/'
         site.instagram_url = 'https://www.instagram.com/friesstation.rest/'
-        # A stand-in so ordering and reservations can be exercised end to end.
-        # Replace it under Settings before the site takes a real order.
+        site.tiktok_url = 'https://www.tiktok.com/@friesstation.rest'
+        site.phone = '+970 593 388 855'
+        site.email = 'info@friesstation.rest'
+        site.address_ar = 'غزة - شارع الوحدة - غرب مفترق العائلات'
+        site.address_en = 'Gaza - Al-Wehda Street - west of Al-Ailat junction'
+        site.tagline_ar = 'من هنا تبدأ… المتعة'
+        site.hero_title_ar = 'من هنا تبدأ… المتعة'
+        site.about_text_ar = (
+            'أول مطعم متخصص في البطاطا المقلية في فلسطين. نقلي الطلب عند طلبه، '
+            'ونصنع صوصاتنا بأنفسنا، ونقدّمها بسرعة وبنفس الجودة في كل مرة.'
+        )
+        site.about_text_en = (
+            'The first restaurant in Palestine dedicated to fries. Everything is '
+            'fried to order, the sauces are our own, and the quality is the same '
+            'every time.'
+        )
+        # A stand-in so ordering can be exercised without messaging the
+        # restaurant. Replace it under Settings before taking a real order.
         if not site.whatsapp_number:
             site.whatsapp_number = '972597862389'
         site.save()
