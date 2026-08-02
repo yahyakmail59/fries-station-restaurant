@@ -123,6 +123,9 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
             ('hours_ar', 'hours_en'),
             'currency',
         )}),
+        ('تشغيل الطلبات', {'fields': (
+            'delivery_enabled',
+        )}),
         ('ضوابط الحجز', {'fields': (
             ('reservation_open_time', 'reservation_close_time'),
             ('reservation_slot_minutes', 'max_reservations_per_slot'),

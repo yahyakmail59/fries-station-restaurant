@@ -29,14 +29,25 @@ class LandingPageTests(TestCase):
         self.assertContains(response, 'فرايز ستيشن')
         self.assertContains(response, 'واتساب')
         self.assertContains(response, 'value="pickup"')
-        self.assertContains(response, 'value="delivery"')
-        self.assertContains(response, 'id="order-phone"')
-        self.assertContains(response, 'id="order-address"')
+        self.assertNotContains(response, 'value="delivery"')
+        self.assertNotContains(response, 'id="order-phone"')
+        self.assertNotContains(response, 'id="order-address"')
         self.assertNotContains(response, 'class="footer-order"')
         self.assertContains(response, 'id="clear-cart"')
         self.assertContains(response, 'class="category-card mobile-all-category active"')
         self.assertContains(response, 'id="active-filter-label"')
         self.assertNotContains(response, 'href="#"')
+
+    def test_delivery_can_be_enabled_from_restaurant_settings(self):
+        site = RestaurantSettings.load()
+        site.delivery_enabled = True
+        site.save()
+
+        response = self.client.get(reverse('restaurant:home'))
+
+        self.assertContains(response, 'value="delivery"')
+        self.assertContains(response, 'id="order-phone"')
+        self.assertContains(response, 'id="order-address"')
 
     def test_offers_have_order_buttons(self):
         Offer.objects.create(
@@ -978,10 +989,12 @@ class ControlPanelTests(TestCase):
             else:
                 data[name] = str(value)
         data['name_ar'] = 'فرايز ستيشن الجديد'
+        data['delivery_enabled'] = 'on'
 
         response = self.client.post(reverse('restaurant:panel_settings'), data)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(RestaurantSettings.load().name_ar, 'فرايز ستيشن الجديد')
+        self.assertTrue(RestaurantSettings.load().delivery_enabled)
 
 
 class ControlPanelPermissionTests(TestCase):
@@ -1201,12 +1214,27 @@ class OrderPricingTests(TestCase):
         self.assertEqual(line.name_ar, 'عصير')
 
     def test_delivery_requires_name_phone_and_address(self):
+        site = RestaurantSettings.load()
+        site.delivery_enabled = True
+        site.save()
         response = self._post({
             'items': [{'id': str(self.kebab.pk), 'qty': 1}],
             'fulfillment': 'delivery', 'name': '', 'phone': '', 'address': '',
         })
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Order.objects.count(), 0)
+
+    def test_disabled_delivery_is_refused_even_with_complete_contact_details(self):
+        response = self._post({
+            'items': [{'id': str(self.kebab.pk), 'qty': 1}],
+            'fulfillment': 'delivery',
+            'name': 'أحمد',
+            'phone': '0593388855',
+            'address': 'غزة',
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertIn('قيد التجهيز', response.json()['error'])
 
     def test_pickup_does_not_require_contact_details(self):
         response = self._post({
