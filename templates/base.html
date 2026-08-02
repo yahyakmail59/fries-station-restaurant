@@ -153,11 +153,8 @@
             <fieldset class="fulfillment-options">
                 <legend>{% if language == 'ar' %}طريقة استلام الطلب{% else %}Order method{% endif %}</legend>
                 <label><input type="radio" name="fulfillment" value="pickup" checked><span><i data-lucide="store"></i>{% if language == 'ar' %}استلام من المطعم{% else %}Pickup{% endif %}</span></label>
-                {% if site.delivery_enabled %}
                 <label><input type="radio" name="fulfillment" value="delivery"><span><i data-lucide="bike"></i>{% if language == 'ar' %}ديليفري{% else %}Delivery{% endif %}</span></label>
-                {% endif %}
             </fieldset>
-            {% if site.delivery_enabled %}
             <div class="delivery-fields hidden" id="delivery-fields">
                 <label class="field-label" for="order-name">{% if language == 'ar' %}اسم صاحب الطلب{% else %}Customer name{% endif %}</label>
                 <input id="order-name" type="text" autocomplete="name">
@@ -166,7 +163,6 @@
                 <label class="field-label" for="order-address">{% if language == 'ar' %}عنوان التوصيل{% else %}Delivery address{% endif %}</label>
                 <textarea id="order-address" rows="2" autocomplete="street-address"></textarea>
             </div>
-            {% endif %}
             <label class="field-label" for="order-notes">{% if language == 'ar' %}ملاحظات الطلب{% else %}Order notes{% endif %}</label>
             <textarea id="order-notes" rows="3"></textarea>
             <button class="btn btn-whatsapp full-width" id="send-whatsapp" type="button"><i data-lucide="send"></i>{% if language == 'ar' %}إرسال عبر واتساب{% else %}Send on WhatsApp{% endif %}</button>

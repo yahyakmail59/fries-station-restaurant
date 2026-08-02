@@ -140,12 +140,6 @@ def create_order(request):
     notes = _clean_text(payload.get('notes'), 500)
 
     if fulfillment == 'delivery':
-        if not site.delivery_enabled:
-            return _error(
-                language,
-                'خدمة التوصيل قيد التجهيز حاليًا. اختر الاستلام من المطعم.',
-                'Delivery is being prepared. Please choose pickup for now.',
-            )
         digits = _phone_digits(phone)
         if not name or not address or not 7 <= len(digits) <= 15:
             return _error(

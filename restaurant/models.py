@@ -136,12 +136,6 @@ class RestaurantSettings(TimeStampedModel):
     facebook_url = models.URLField(blank=True, verbose_name='رابط فيسبوك')
     tiktok_url = models.URLField(blank=True, verbose_name='رابط تيك توك')
 
-    delivery_enabled = models.BooleanField(
-        default=False,
-        verbose_name='تفعيل التوصيل',
-        help_text='عند إيقافه يختفي خيار التوصيل من السلة ويرفض الخادم طلبات التوصيل.',
-    )
-
     show_about = models.BooleanField(default=True, verbose_name='إظهار قسم من نحن')
     show_categories = models.BooleanField(default=True, verbose_name='إظهار أقسام القائمة')
     show_featured = models.BooleanField(default=True, verbose_name='إظهار قائمة الأطباق')
@@ -153,13 +147,13 @@ class RestaurantSettings(TimeStampedModel):
     show_social = models.BooleanField(default=True, verbose_name='إظهار معرض التواصل الاجتماعي')
 
     reservation_open_time = models.TimeField(
-        default=time(11, 30),
+        default=time(8, 0),
         verbose_name='بداية استقبال الحجوزات',
     )
     reservation_close_time = models.TimeField(
-        default=time(23, 30),
+        default=time(2, 0),
         verbose_name='نهاية استقبال الحجوزات',
-        help_text='يمكن أن تكون بعد منتصف الليل إذا تغيّرت ساعات العمل لاحقًا.',
+        help_text='يمكن أن تكون بعد منتصف الليل، مثل 02:00.',
     )
     reservation_slot_minutes = models.PositiveSmallIntegerField(
         default=30,
