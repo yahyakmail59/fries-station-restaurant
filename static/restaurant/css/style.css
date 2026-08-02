@@ -151,7 +151,9 @@ svg { stroke-width: 1.8; }
 
 .language-switch { display: flex; gap: 6px; align-items: center; font: var(--weight-bold) .74rem var(--font-latin); color: var(--border-strong); }
 .language-switch a { min-width: 32px; min-height: 44px; display: grid; place-items: center; border-radius: var(--radius-sm); color: var(--text-muted); }
-.language-switch a.active { color: var(--brand-primary); background: var(--brand-soft); }
+/* The brand red on the soft yellow measures 4.01:1, just under the threshold
+   for text this small. The deep red on the same yellow is 9.27:1. */
+.language-switch a.active { color: var(--brand-deep); background: var(--brand-soft); }
 .language-switch a:hover { color: var(--brand-primary); }
 
 .nav-toggle {
@@ -414,7 +416,10 @@ html[dir="ltr"] .hero-ar { direction: rtl; text-align: right; font-family: var(-
     overflow: hidden;
     border: 2px solid transparent;
     border-radius: var(--radius-lg);
-    background: var(--surface-card);
+    /* Every card carries white text. The others get their contrast from the
+       photograph's scrim; this one has no photograph, so the surface itself
+       has to be the brand red or the label disappears into the card. */
+    background: var(--gradient-brand);
     color: var(--text-on-brand);
     padding: 18px 8px 0;
     cursor: pointer;
