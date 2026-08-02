@@ -20,6 +20,7 @@ py -m venv .venv
 python -m pip install --upgrade pip
 pip install -r requirements.txt
 python manage.py migrate
+python manage.py seed_menu
 python manage.py createsuperuser
 python manage.py runserver
 ```
@@ -31,6 +32,19 @@ python manage.py runserver
 | لوحة التحكم | http://127.0.0.1:8000/dashboard/ |
 | الكاشير | http://127.0.0.1:8000/dashboard/cashier/ |
 | لوحة Django | http://127.0.0.1:8000/admin/ |
+
+## تحميل القائمة
+
+```powershell
+python manage.py seed_menu
+```
+
+يحمّل تصنيفات فرايز ستيشن وأصنافها وأحجامها المعتمدة. إذا كانت القائمة محمّلة
+بالفعل يتوقف الأمر حمايةً لتعديلات لوحة التحكم. لإعادة التحميل عمدًا استخدم
+`--force`، ولا تفعل ذلك على قاعدة تستقبل طلبات حقيقية.
+
+> **قبل أي طلب حقيقي:** رقم واتساب المحمَّل رقم تجريبي. استبدله برقم المطعم من
+> `لوحة التحكم ← إعدادات الموقع`.
 
 ## الفحص والاختبار
 

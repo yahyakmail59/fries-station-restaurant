@@ -70,7 +70,7 @@
 | C3 | تغيير الكمية | درج السلة | `main.js:263-273`, `[data-cart-action]` | `increase` (≤99) / `decrease` (≥1) | مظهر فقط | الإجمالي يتحدث | — | عام | يدوي | ⬜ |
 | C4 | حذف صنف | درج السلة | `main.js:271` | `data-cart-action="remove"` | مظهر فقط | يُزال ويُحفظ | — | عام | يدوي | ⬜ |
 | C5 | مسح السلة | `#clear-cart` | `main.js:276-283` | `window.confirm` قبل المسح | مظهر فقط | تُفرغ بعد التأكيد | إلغاء ← لا شيء | عام | يدوي | ⬜ |
-| C6 | Local Storage | المتصفح | `main.js:7,36-54` | مفتاح `b12-whatsapp-cart` — **يُعاد تسميته إلى `fries-station-cart` (م12)** | **تغيير الاسم مسموح ومطلوب** | تدوم بعد إعادة التحميل | تخزين معطّل ← السلة تعمل بلا حفظ | عام | يدوي | ⬜ |
+| C6 | Local Storage | المتصفح | `main.js:7,36-54` | مفتاح `fries-station-cart`؛ كل سطر يحمل `itemId` و`sizeId` | — | تدوم بعد إعادة التحميل، والحجم معها | تخزين معطّل ← السلة تعمل بلا حفظ؛ حجم اختفى من القائمة ← يُسقط السطر | عام | يدوي | ✅ |
 | C7 | تنظيف السلة المخزّنة | التحميل | `main.js:39-51` | كل حقل يُجبَر على نوعه؛ الكمية تُقصّ إلى 1..99؛ عنصر بلا `id` أو اسم يُسقط | لا شيء | JSON تالف ← سلة فارغة لا انهيار | — | عام | يدوي | ⬜ |
 | C8 | مزامنة السلة مع الصفحة | التحميل | `main.js:211-217` | صنف لم يعد له زر في الصفحة يُحذف؛ الأسماء والأسعار تُحدَّث من DOM | لا شيء | صنف محذوف يختفي من السلة | — | عام | يدوي | ⬜ |
 | C9 | الإجمالي التقريبي | `#cart-total` | `main.js:158-161` | يجمع المُسعَّر فقط؛ يُنبَّه لوجود عناصر بلا سعر | مظهر فقط | الرقم مطابق | — | عام | يدوي | ⬜ |
@@ -85,6 +85,7 @@
 | C18 | تحقق حقول التوصيل (خادم) | `POST /order/` | `views_order.py:106-113` | يُعاد التحقق على الخادم — العميل ليس مصدر ثقة | **لا يجوز إضعافه** | 400 عند النقص | JSON `{"error": …}` | عام | `test_delivery_requires_name_phone_and_address` | ⬜ |
 | C19 | الاستلام بلا بيانات | `POST /order/` | `views_order.py` | لا يشترط اسمًا ولا هاتفًا | لا شيء | الطلب يُنشأ | — | عام | `test_pickup_does_not_require_contact_details` | ⬜ |
 | C20 | **التسعير من قاعدة البيانات** | `POST /order/` | `views_order.py:73-160` | المتصفح يرسل `{id, qty}` فقط؛ أي `price` مُرسل **يُتجاهل** | **ممنوع المساس** | الإجمالي = مجموع أسعار القائمة | — | عام | `test_the_server_prices_the_order_from_the_menu` · `test_a_price_sent_by_the_browser_is_ignored` | ⬜ |
+| C20b | **اختيار الحجم** | `/`, `/menu/`, `POST /order/` | `models.MenuItemSize`, `views_order._resolve_price`, `main.js` | جديد بعد خط الأساس | **إضافة** | الحجم المختار يحدد السعر ويُحفظ نسخةً على السطر | حجم غريب أو معطّل أو غائب ← يرجع إلى الأصغر، ولا يتجاوز ما عُرض | عام | `ItemSizePricingTests` (10) | ✅ |
 | C21 | لقطة السعر لا مرجع | — | `OrderLine` | الاسم والسعر نسخة وقت الطلب | **ممنوع المساس** | تعديل القائمة لا يغيّر طلبًا قديمًا | حذف الطبق ← الطلب يبقى مقروءًا | — | `test_line_prices_are_a_snapshot_not_a_live_lookup` · `test_deleting_a_dish_keeps_the_order_readable` | ⬜ |
 | C22 | دمج المعرّفات المكررة | `POST /order/` | `views_order.py:94` | نفس المعرّف مرتين ← سطر واحد بكمية مجمّعة | لا شيء | سطر واحد | — | عام | `test_repeated_ids_are_merged_rather_than_duplicated` | ⬜ |
 | C23 | إسقاط غير المتاح | `POST /order/` | `views_order.py:132` | `is_available=False` يُسقط بصمت | لا شيء | الطلب يتم بالباقي | كله غير متاح ← 409 | عام | `test_an_unavailable_dish_is_dropped` · `test_an_order_of_only_unavailable_dishes_is_refused` | ⬜ |
@@ -211,20 +212,22 @@ body[data-lang] [data-currency] [data-whatsapp] [data-order-url]
 .menu-card[data-category] [data-search]
 #menu-grid[data-page-size]
 [data-cart-action] [data-cart-id]
+.js-add-item[data-item]           يربط الزر بمنتقي الحجم في بطاقته
+.size-picker input[name=size-<id>] [data-price] [data-size-ar] [data-size-en]
 .nav-toggle[data-open-label] [data-close-label] [aria-expanded]
 .reservation-form button[data-submit-label]
 ```
 
 ### عقد JSON لنقطة الطلب
 ```
-الطلب:  {items: [{id, qty}], fulfillment, name, phone, address, notes}
+الطلب:  {items: [{id, size?, qty}], fulfillment, name, phone, address, notes}
 الرد:   {code, order_url, receipt_url, whatsapp_url, message}
 الخطأ:  {error: "..."}   بحالة 400 / 409 / 429
 ```
 
 ### أسماء أقسام اللوحة (`slug`)
 ```
-orders  reservations  menu  categories  offers  services  reviews  faq  social  hero
+orders  reservations  menu  sizes  categories  offers  services  reviews  faq  social  hero
 ```
 
 ### قيم قواعد البيانات المحفوظة
@@ -241,8 +244,8 @@ Reservation.status  new contacted confirmed cancelled
 
 | العنصر | من | إلى | المرحلة |
 |---|---|---|---|
-| مفتاح localStorage | `b12-whatsapp-cart` | مفتاح فرايز ستيشن | 12 |
-| بادئة رمز الطلب | `B12-` | بادئة فرايز ستيشن | 12 |
+| مفتاح localStorage | `b12-whatsapp-cart` | `fries-station-cart` | ✅ تم |
+| بادئة رمز الطلب | `B12-` | `FS-` عبر `Order.CODE_PREFIX` | ✅ تم |
 | ملف ووسم إحصاءات الإدارة | `b12_admin.py` / `b12_admin_stats` | تسمية فرايز ستيشن | 12 |
 | مراجع تباين الألوان | مبنية على `#050505` / سطح داكن | مبنية على هوية فرايز ستيشن | 6 و10 |
 | `hero_image_mobile_src` | مربوط بـ `hero-b12.webp` | منطق معمَّم | 9 |

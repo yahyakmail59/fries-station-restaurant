@@ -93,12 +93,27 @@
                     <h3>{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}</h3>
                     <h4>{% if language == 'ar' %}{{ item.name_en|upper }}{% else %}{{ item.name_ar }}{% endif %}</h4>
                     <p>{% if language == 'ar' %}{{ item.description_ar|truncatechars:105 }}{% else %}{{ item.description_en|default:item.description_ar|truncatechars:105 }}{% endif %}</p>
+                    {% if item.available_sizes %}
+                    <div class="size-picker" role="radiogroup" aria-label="{% if language == 'ar' %}اختر الحجم{% else %}Choose a size{% endif %}">
+                        {% for size in item.available_sizes %}
+                        <label>
+                            <input type="radio" name="size-{{ item.id }}" value="{{ size.id }}"
+                                   data-price="{{ size.price|unlocalize }}"
+                                   data-size-ar="{{ size.name_ar|escape }}"
+                                   data-size-en="{{ size.name_en|default:size.name_ar|escape }}"
+                                   {% if forloop.first %}checked{% endif %}>
+                            <span>{% if language == 'ar' %}{{ size.name_ar }}{% else %}{{ size.name_en|default:size.name_ar }}{% endif %}
+                                <b>{{ size.price|floatformat:-2 }}</b></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <div class="menu-bottom">
                         <div class="price-wrap">
                             {% if item.old_price %}<del>{{ item.old_price|floatformat:-2 }}</del>{% endif %}
-                            <strong>{{ item.price|floatformat:-2 }} <small>{{ site.currency }}</small></strong>
+                            <strong>{{ item.base_price|floatformat:-2 }} <small>{{ site.currency }}</small></strong>
                         </div>
-                        <button class="mini-whatsapp js-add-item{% if item.is_featured %} featured-order-btn{% endif %}" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
+                        <button data-item="{{ item.id }}" class="mini-whatsapp js-add-item{% if item.is_featured %} featured-order-btn{% endif %}" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
                             <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
                             {% if item.is_featured %}<span class="add-label">{% if language == 'ar' %}اطلب الطبق{% else %}Order dish{% endif %}</span>{% endif %}
                         </button>
@@ -147,9 +162,24 @@
                         <strong><i data-lucide="flame"></i>{{ item.order_count }} {% if language == 'ar' %}طلب{% else %}orders{% endif %}</strong>
                         <small>{{ item.online_order_count }} {% if language == 'ar' %}أونلاين{% else %}online{% endif %} · {{ item.cashier_order_count }} {% if language == 'ar' %}داخل المطعم{% else %}dine-in{% endif %}</small>
                     </div>
+                    {% if item.available_sizes %}
+                    <div class="size-picker" role="radiogroup" aria-label="{% if language == 'ar' %}اختر الحجم{% else %}Choose a size{% endif %}">
+                        {% for size in item.available_sizes %}
+                        <label>
+                            <input type="radio" name="size-{{ item.id }}" value="{{ size.id }}"
+                                   data-price="{{ size.price|unlocalize }}"
+                                   data-size-ar="{{ size.name_ar|escape }}"
+                                   data-size-en="{{ size.name_en|default:size.name_ar|escape }}"
+                                   {% if forloop.first %}checked{% endif %}>
+                            <span>{% if language == 'ar' %}{{ size.name_ar }}{% else %}{{ size.name_en|default:size.name_ar }}{% endif %}
+                                <b>{{ size.price|floatformat:-2 }}</b></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <div class="menu-bottom">
-                        <div class="price-wrap"><strong>{{ item.price|floatformat:-2 }} <small>{{ site.currency }}</small></strong></div>
-                        <button class="mini-whatsapp js-add-item" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
+                        <div class="price-wrap"><strong>{{ item.base_price|floatformat:-2 }} <small>{{ site.currency }}</small></strong></div>
+                        <button data-item="{{ item.id }}" class="mini-whatsapp js-add-item" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
                             <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
                         </button>
                     </div>

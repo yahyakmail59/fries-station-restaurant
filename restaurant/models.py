@@ -62,6 +62,12 @@ class RestaurantSettings(TimeStampedModel):
         verbose_name='رابط أو مسار صورة الواجهة البديل',
     )
     og_image = models.ImageField(upload_to='branding/', blank=True, verbose_name='صورة المشاركة الاجتماعية')
+    og_image_url = models.CharField(
+        max_length=500,
+        blank=True,
+        validators=[image_source_validator],
+        verbose_name='رابط أو مسار صورة المشاركة البديل',
+    )
 
     # Five brand colours, each paired in the admin form with the text colour it
     # actually carries: white sits on the two reds, dark ink sits on everything
@@ -211,7 +217,9 @@ class RestaurantSettings(TimeStampedModel):
     def og_image_src(self):
         if self.og_image:
             return self.og_image.url
-        return self.hero_image_src
+        # A share card built for the purpose beats a cropped hero photo, but
+        # the hero still stands in when neither is set.
+        return self.og_image_url or self.hero_image_src
 
     def __str__(self):
         return self.name_ar
@@ -360,8 +368,54 @@ class MenuItem(TimeStampedModel):
             return self.image.url
         return self.image_url
 
+    @property
+    def available_sizes(self):
+        """The sizes a customer may actually pick, cheapest first."""
+        return [size for size in self.sizes.all() if size.is_available]
+
+    @property
+    def base_price(self):
+        """What the card shows. With sizes this is the cheapest one."""
+        sizes = self.available_sizes
+        return sizes[0].price if sizes else self.price
+
     def __str__(self):
         return self.name_ar
+
+
+class MenuItemSize(TimeStampedModel):
+    """One size of a dish, priced in full rather than as a surcharge.
+
+    The prices are absolute, not additions to the dish price: a large portion
+    of fries is 15, not 7 plus 8. That mirrors how the restaurant's own
+    ordering system stores them, so the two can never drift into charging
+    different amounts for the same thing.
+    """
+
+    menu_item = models.ForeignKey(
+        MenuItem, on_delete=models.CASCADE, related_name='sizes', verbose_name='الصنف',
+    )
+    name_ar = models.CharField(max_length=60, verbose_name='اسم الحجم بالعربية')
+    name_en = models.CharField(max_length=60, blank=True, verbose_name='اسم الحجم بالإنجليزية')
+    price = models.DecimalField(
+        max_digits=8, decimal_places=2,
+        validators=[MinValueValidator(Decimal('0.01'))], verbose_name='السعر',
+    )
+    display_order = models.PositiveSmallIntegerField(default=0, verbose_name='الترتيب')
+    is_available = models.BooleanField(default=True, verbose_name='متاح')
+
+    class Meta:
+        ordering = ['display_order', 'price', 'id']
+        verbose_name = 'حجم'
+        verbose_name_plural = 'الأحجام'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['menu_item', 'name_ar'], name='unique_size_name_per_item',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.menu_item.name_ar} — {self.name_ar}'
 
 
 class Offer(TimeStampedModel):
@@ -651,6 +705,10 @@ class OrderLine(TimeStampedModel):
     )
     name_ar = models.CharField(max_length=150, verbose_name='الاسم بالعربية')
     name_en = models.CharField(max_length=150, blank=True, verbose_name='الاسم بالإنجليزية')
+    # A copy, like the name and the price: renaming a size later must not
+    # rewrite what a past order says was bought.
+    size_label_ar = models.CharField(max_length=60, blank=True, verbose_name='الحجم بالعربية')
+    size_label_en = models.CharField(max_length=60, blank=True, verbose_name='الحجم بالإنجليزية')
     quantity = models.PositiveSmallIntegerField(default=1, validators=[MinValueValidator(1), MaxValueValidator(99)], verbose_name='الكمية')
     unit_price = models.DecimalField(max_digits=8, decimal_places=2, default=Decimal('0'), verbose_name='سعر الوحدة')
     is_priced = models.BooleanField(default=True, verbose_name='له سعر ثابت')
@@ -665,5 +723,10 @@ class OrderLine(TimeStampedModel):
     def line_total(self):
         return self.unit_price * self.quantity if self.is_priced else Decimal('0')
 
+    def display_name(self, language='ar'):
+        name = self.name_en or self.name_ar if language == 'en' else self.name_ar
+        size = self.size_label_en or self.size_label_ar if language == 'en' else self.size_label_ar
+        return f'{name} — {size}' if size else name
+
     def __str__(self):
-        return f'{self.name_ar} × {self.quantity}'
+        return f'{self.display_name()} × {self.quantity}'

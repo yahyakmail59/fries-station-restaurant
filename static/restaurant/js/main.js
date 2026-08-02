@@ -4,7 +4,7 @@
     const body = document.body;
     const lang = body.dataset.lang || 'ar';
     const currency = body.dataset.currency || '₪';
-    const storageKey = 'b12-whatsapp-cart';
+    const storageKey = 'fries-station-cart';
 
     const safeJSON = (value, fallback) => {
         try { return JSON.parse(value); } catch (_) { return fallback; }
@@ -46,6 +46,9 @@
             priceTextAr: String(item.priceTextAr || ''),
             priceTextEn: String(item.priceTextEn || ''),
             priced: item.priced !== false,
+            sizeId: String(item.sizeId || ''),
+            sizeAr: String(item.sizeAr || ''),
+            sizeEn: String(item.sizeEn || ''),
             qty: Number.isFinite(Number(item.qty)) ? Math.min(99, Math.max(1, Math.trunc(Number(item.qty)))) : 1,
         }))
         .filter(item => item.id && (item.nameAr || item.nameEn)) : [];
@@ -60,7 +63,12 @@
         return `${number.toFixed(number % 1 ? 2 : 0)} ${currency}`;
     };
 
-    const itemName = item => lang === 'ar' ? item.nameAr : item.nameEn;
+    const itemSize = item => (lang === 'ar' ? item.sizeAr : (item.sizeEn || item.sizeAr));
+    const itemName = item => {
+        const base = lang === 'ar' ? item.nameAr : item.nameEn;
+        const size = itemSize(item);
+        return size ? `${base} — ${size}` : base;
+    };
     const itemPriceLabel = item => {
         if (item.priced) return formatPrice(item.price);
         return lang === 'ar' ? item.priceTextAr : (item.priceTextEn || item.priceTextAr);
@@ -169,7 +177,8 @@
         cartItems.innerHTML = cart.map(item => `
             <article class="cart-item" data-cart-id="${escapeHTML(item.id)}">
                 <div>
-                    <h3>${escapeHTML(itemName(item))}</h3>
+                    <h3>${escapeHTML(lang === 'ar' ? item.nameAr : item.nameEn)}</h3>
+                    ${itemSize(item) ? `<span class="cart-size">${escapeHTML(itemSize(item))}</span>` : ''}
                     <span class="cart-item-price">${escapeHTML(itemPriceLabel(item))}</span>
                 </div>
                 <div class="qty-control">
@@ -189,6 +198,15 @@
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 
+    const selectedSize = button => {
+        // The picker lives in the same card, keyed by the dish id.
+        const itemId = button.dataset.item;
+        if (!itemId) return null;
+        return document.querySelector(
+            `.size-picker input[name="size-${CSS.escape(itemId)}"]:checked`,
+        );
+    };
+
     const buttonToCartItem = button => {
         const isOffer = button.dataset.offer === 'true';
         const priceTextAr = button.dataset.priceTextAr || '';
@@ -196,11 +214,19 @@
         const activePriceText = lang === 'ar' ? priceTextAr : priceTextEn;
         const fixedPricePattern = /^\s*[\d٠-٩۰-۹]+(?:[.,٫][\d٠-٩۰-۹]{1,2})?\s*(?:₪|ILS|شيكل)?\s*$/i;
         const offerHasFixedPrice = isOffer && fixedPricePattern.test(activePriceText) && parsePrice(activePriceText) > 0;
+        const size = isOffer ? null : selectedSize(button);
+        const itemId = String(button.dataset.id || '');
         return {
-            id: String(button.dataset.id || ''),
+            id: size ? `${itemId}:${size.value}` : itemId,
+            itemId,
+            sizeId: size ? String(size.value) : '',
+            sizeAr: size ? (size.dataset.sizeAr || '') : '',
+            sizeEn: size ? (size.dataset.sizeEn || '') : '',
             nameAr: button.dataset.nameAr || '',
             nameEn: button.dataset.nameEn || '',
-            price: isOffer ? (offerHasFixedPrice ? parsePrice(activePriceText) : 0) : parsePrice(button.dataset.price),
+            price: isOffer
+                ? (offerHasFixedPrice ? parsePrice(activePriceText) : 0)
+                : parsePrice(size ? size.dataset.price : button.dataset.price),
             priceTextAr,
             priceTextEn,
             priced: !isOffer || offerHasFixedPrice,
@@ -212,8 +238,28 @@
         const availableButtons = [...document.querySelectorAll('.js-add-item[data-id]')];
         const byId = new Map(availableButtons.map(button => [String(button.dataset.id), button]));
         cart = cart
-            .filter(item => byId.has(item.id))
-            .map(item => ({...buttonToCartItem(byId.get(item.id)), qty: Math.min(99, Math.max(1, item.qty))}));
+            .filter(item => byId.has(item.itemId || item.id))
+            .map(item => {
+                // Re-read the dish from the page, but keep the size this line
+                // was added with rather than whatever the card shows now.
+                const button = byId.get(item.itemId || item.id);
+                const fresh = buttonToCartItem(button);
+                if (!item.sizeId) return {...fresh, qty: Math.min(99, Math.max(1, item.qty))};
+                const picker = document.querySelector(
+                    `.size-picker input[name="size-${CSS.escape(item.itemId || item.id)}"][value="${CSS.escape(item.sizeId)}"]`,
+                );
+                if (!picker) return null;   // that size is gone from the menu
+                return {
+                    ...fresh,
+                    id: `${item.itemId || item.id}:${item.sizeId}`,
+                    sizeId: item.sizeId,
+                    sizeAr: picker.dataset.sizeAr || '',
+                    sizeEn: picker.dataset.sizeEn || '',
+                    price: parsePrice(picker.dataset.price),
+                    qty: Math.min(99, Math.max(1, item.qty)),
+                };
+            })
+            .filter(Boolean);
     };
 
     document.addEventListener('click', event => {
@@ -345,7 +391,11 @@
                 credentials: 'same-origin',
                 headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken()},
                 body: JSON.stringify({
-                    items: cart.map(item => ({id: item.id, qty: item.qty})),
+                    items: cart.map(item => ({
+                        id: item.itemId || item.id,
+                        size: item.sizeId || undefined,
+                        qty: item.qty,
+                    })),
                     fulfillment,
                     name,
                     phone,

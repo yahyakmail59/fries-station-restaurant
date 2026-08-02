@@ -520,6 +520,38 @@ html[dir="ltr"] .menu-image-empty::after { content: "Photo coming soon"; }
 html[dir="rtl"] .menu-content h4 { direction: ltr; text-align: right; }
 html[dir="ltr"] .menu-content h4 { direction: rtl; text-align: left; font-family: var(--font-arabic); }
 .menu-content p { margin: 0; color: var(--text-muted); font-size: .72rem; line-height: 1.75; min-height: 52px; }
+/* Size picker: a segmented control, because the choice is one of two and
+   both prices have to be visible before the customer commits to one. */
+.size-picker { display: flex; gap: 6px; margin: 0 0 10px; direction: inherit; }
+.size-picker label { flex: 1 1 0; min-width: 0; cursor: pointer; }
+.size-picker input {
+    position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+    overflow: hidden; clip-path: inset(50%); white-space: nowrap; opacity: 0;
+}
+.size-picker span {
+    min-height: 44px;
+    padding: 5px 8px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-md);
+    background: var(--surface-page);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.25;
+    font-size: .68rem;
+    font-weight: var(--weight-bold);
+    text-align: center;
+}
+.size-picker span b { font: var(--weight-black) .8rem var(--font-latin); color: var(--text-muted); }
+.size-picker input:checked + span {
+    border-color: var(--brand-primary);
+    background: var(--brand-soft);
+    box-shadow: inset 0 0 0 1px var(--brand-primary);
+}
+.size-picker input:checked + span b { color: var(--brand-primary); }
+.size-picker input:focus-visible + span { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
+
 .menu-bottom { margin-top: auto; display: flex; align-items: end; justify-content: space-between; gap: 10px; direction: ltr; }
 .price-wrap { display: flex; align-items: baseline; gap: 8px; direction: ltr; }
 .price-wrap del { color: var(--text-muted); font: var(--weight-medium) .7rem var(--font-latin); }
@@ -970,6 +1002,7 @@ html:not(.icons-ready) .icon-btn::after { content: "\00D7"; font-size: 1.4rem; }
 }
 .cart-item > div { min-width: 0; }
 .cart-item h3 { font-size: .84rem; margin: 0; overflow-wrap: anywhere; }
+.cart-item .cart-size { display: inline-block; margin-top: 2px; padding: 2px 8px; border-radius: var(--radius-pill); background: var(--brand-soft); color: var(--brand-deep); font-size: .64rem; font-weight: var(--weight-bold); }
 .cart-item-price { font: var(--weight-black) .74rem var(--font-latin); color: var(--brand-primary); }
 .qty-control { display: flex; align-items: center; justify-content: flex-end; gap: 6px; max-width: 100%; direction: ltr; }
 .qty-control button { width: 44px; height: 44px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface-page); cursor: pointer; font-weight: var(--weight-bold); }

@@ -10,6 +10,7 @@ from django.utils import timezone
 
 from . import crm
 from .models import (
+    MenuItemSize,
     Category, HeroStat, MenuItem, Offer, Order, OrderLine, Reservation, RestaurantSettings,
     SocialPost,
 )
@@ -1286,6 +1287,106 @@ class OrderPricingTests(TestCase):
                     any('؀' <= character <= 'ۿ' for character in message),
                     f'Arabic visitor was shown English: {message}',
                 )
+
+
+class ItemSizePricingTests(TestCase):
+    """Sizes carry absolute prices, so the wrong one is a wrong bill."""
+
+    def setUp(self):
+        cache.clear()
+        site = RestaurantSettings.load()
+        site.whatsapp_number = '970500000000'
+        site.save()
+        category = Category.objects.create(name_ar='فرايز', name_en='Fries')
+        self.fries = MenuItem.objects.create(
+            category=category, name_ar='فرايز', name_en='Fries', price=Decimal('7'),
+        )
+        self.small = MenuItemSize.objects.create(
+            menu_item=self.fries, name_ar='صغير', name_en='Small',
+            price=Decimal('7'), display_order=1,
+        )
+        self.large = MenuItemSize.objects.create(
+            menu_item=self.fries, name_ar='كبير', name_en='Large',
+            price=Decimal('15'), display_order=2,
+        )
+        self.other = MenuItem.objects.create(
+            category=category, name_ar='كلاسيك فرايز', name_en='Classic Fries',
+            price=Decimal('25'),
+        )
+        self.url = reverse('restaurant:create_order')
+
+    def _post(self, items):
+        return self.client.post(
+            self.url, data={'items': items}, content_type='application/json',
+        )
+
+    def test_the_chosen_size_sets_the_price(self):
+        self._post([{'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, Decimal('15'))
+        self.assertEqual(order.lines.first().size_label_ar, 'كبير')
+
+    def test_the_card_price_is_the_cheapest_size(self):
+        self.assertEqual(self.fries.base_price, Decimal('7'))
+
+    def test_a_dish_without_sizes_is_unaffected(self):
+        self._post([{'id': str(self.other.pk), 'size': str(self.large.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, Decimal('25'))
+        self.assertEqual(order.lines.first().size_label_ar, '')
+
+    def test_a_size_belonging_to_another_dish_cannot_be_borrowed(self):
+        stray = MenuItemSize.objects.create(
+            menu_item=self.other, name_ar='ضخم', price=Decimal('1'),
+        )
+        self._post([{'id': str(self.fries.pk), 'size': str(stray.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        # Falls back to the cheapest of this dish's own sizes, never the
+        # cheaper row that belongs to something else.
+        self.assertEqual(order.total, Decimal('7'))
+        self.assertEqual(order.lines.first().size_label_ar, 'صغير')
+
+    def test_a_missing_size_never_charges_more_than_the_card_showed(self):
+        self._post([{'id': str(self.fries.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, self.fries.base_price)
+
+    def test_an_unavailable_size_is_not_selectable(self):
+        self.large.is_available = False
+        self.large.save()
+        self._post([{'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, Decimal('7'))
+
+    def test_two_sizes_of_one_dish_are_two_lines(self):
+        self._post([
+            {'id': str(self.fries.pk), 'size': str(self.small.pk), 'qty': 2},
+            {'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1},
+        ])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.lines.count(), 2)
+        self.assertEqual(order.total, Decimal('29'))
+
+    def test_the_same_size_twice_is_merged(self):
+        self._post([
+            {'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1},
+            {'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 2},
+        ])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.lines.count(), 1)
+        self.assertEqual(order.lines.first().quantity, 3)
+
+    def test_a_price_sent_beside_the_size_is_still_ignored(self):
+        self._post([{
+            'id': str(self.fries.pk), 'size': str(self.small.pk), 'qty': 1, 'price': '0.01',
+        }])
+        self.assertEqual(Order.objects.latest('created_at').total, Decimal('7'))
+
+    def test_the_size_is_written_on_the_line_the_customer_reads(self):
+        self._post([{'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1}])
+        line = Order.objects.latest('created_at').lines.first()
+        self.assertEqual(line.display_name('ar'), 'فرايز — كبير')
+        self.assertEqual(line.display_name('en'), 'Fries — Large')
 
 
 class OrderCodeTests(TestCase):

@@ -122,7 +122,15 @@
             var total = 0;
             quantityInputs.forEach(function (input) {
                 var quantity = Math.max(0, Math.min(99, parseInt(input.value || '0', 10) || 0));
-                var price = parseFloat(input.dataset.price || '0') || 0;
+                // A dish with sizes is priced by the size the cashier picked.
+                // This is a preview only; the server prices the saved order.
+                var itemId = input.dataset.item;
+                var chosen = itemId && cashierForm.querySelector(
+                    'input[name="size_' + itemId + '"]:checked'
+                );
+                var price = parseFloat(
+                    (chosen && chosen.dataset.price) || input.dataset.price || '0'
+                ) || 0;
                 input.value = quantity;
                 count += quantity;
                 total += quantity * price;
@@ -147,6 +155,11 @@
         });
         quantityInputs.forEach(function (input) {
             input.addEventListener('input', updateCashierSummary);
+        });
+        Array.prototype.slice.call(
+            cashierForm.querySelectorAll('.cashier-sizes input')
+        ).forEach(function (radio) {
+            radio.addEventListener('change', updateCashierSummary);
         });
         updateCashierSummary();
     }

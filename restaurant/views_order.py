@@ -52,6 +52,22 @@ def _error(language, arabic, english, status=400):
     return JsonResponse({'error': arabic if language == 'ar' else english}, status=status)
 
 
+def _resolve_price(item, size_id):
+    """The price the restaurant is owed for one unit, and what to call it.
+
+    The browser sends a size id, never a price. If the dish has sizes and the
+    id does not match one of its own available rows, this falls back to the
+    cheapest size rather than refusing: the cheapest is what the card
+    advertised, so a stale or tampered id can never charge more than the
+    customer was shown.
+    """
+    sizes = item.available_sizes
+    if not sizes:
+        return item.price, '', ''
+    chosen = next((size for size in sizes if size.pk == size_id), sizes[0])
+    return chosen.price, chosen.name_ar, chosen.name_en
+
+
 def _clean_text(value, limit):
     return str(value or '').strip()[:limit]
 
@@ -82,7 +98,9 @@ def create_order(request):
     if len(raw_items) > MAX_LINES:
         return _error(language, 'عدد الأصناف كبير جدًا.', 'That is too many items for one order.')
 
-    # Only ids and quantities are read. A price in the payload is ignored.
+    # Only ids, sizes and quantities are read. A price in the payload is
+    # ignored, and so is any size that does not belong to the dish it was sent
+    # with — the size is a pointer to a row, never a number.
     wanted_items, wanted_offers = {}, {}
     for entry in raw_items:
         if not isinstance(entry, dict):
@@ -97,13 +115,19 @@ def create_order(request):
         raw_id = str(entry.get('id', ''))
         if raw_id.startswith('offer-'):
             key = raw_id.removeprefix('offer-')
-            target = wanted_offers
-        else:
-            key = raw_id
-            target = wanted_items
-        if not key.isdigit():
+            if not key.isdigit():
+                continue
+            wanted_offers[int(key)] = wanted_offers.get(int(key), 0) + quantity
             continue
-        target[int(key)] = target.get(int(key), 0) + quantity
+
+        if not raw_id.isdigit():
+            continue
+        raw_size = str(entry.get('size', ''))
+        size_id = int(raw_size) if raw_size.isdigit() else None
+        # One line per dish-and-size pair: a small and a large of the same
+        # dish are two different things to make and to charge for.
+        line_key = (int(raw_id), size_id)
+        wanted_items[line_key] = wanted_items.get(line_key, 0) + quantity
 
     if not wanted_items and not wanted_offers:
         return _error(language, 'لا يوجد صنف صالح في السلة.', 'No valid item was found in your cart.')
@@ -141,14 +165,24 @@ def create_order(request):
         has_unpriced = False
         lines = []
 
-        available = MenuItem.objects.filter(pk__in=wanted_items, is_available=True)
-        for item in available:
-            quantity = wanted_items[item.pk]
-            total += item.price * quantity
+        item_ids = {item_id for item_id, _ in wanted_items}
+        available = {
+            item.pk: item
+            for item in MenuItem.objects.filter(
+                pk__in=item_ids, is_available=True
+            ).prefetch_related('sizes')
+        }
+        for (item_id, size_id), quantity in wanted_items.items():
+            item = available.get(item_id)
+            if item is None:
+                continue
+            unit_price, label_ar, label_en = _resolve_price(item, size_id)
+            total += unit_price * quantity
             lines.append(OrderLine(
                 order=order, menu_item=item,
                 name_ar=item.name_ar, name_en=item.name_en,
-                quantity=quantity, unit_price=item.price, is_priced=True,
+                size_label_ar=label_ar, size_label_en=label_en,
+                quantity=quantity, unit_price=unit_price, is_priced=True,
             ))
 
         for offer in Offer.objects.filter(pk__in=wanted_offers, is_active=True):

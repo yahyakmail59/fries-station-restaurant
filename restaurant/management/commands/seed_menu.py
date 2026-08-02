@@ -19,6 +19,7 @@ from restaurant.models import (
     FAQ,
     HeroStat,
     MenuItem,
+    MenuItemSize,
     RestaurantSettings,
     Service,
 )
@@ -35,6 +36,7 @@ CATEGORIES = [
     ('salad', 'سلطات', 'Salad', 'salad', 'salad', 6),
     ('sweets', 'حلويات', 'Sweets', 'dessert', 'sweets', 7),
     ('drinks', 'مشروبات', 'Drinks', 'drink', 'drinks', 8),
+    ('extras', 'إضافات', 'Extras', 'sauce', 'sauces', 9),
 ]
 
 # slug, category, ar, en, price, description_ar, description_en, has_photo, featured
@@ -144,8 +146,25 @@ ITEMS = [
     ('seasonal-juice', 'drinks', 'عصير الموسم', 'Seasonal Juice', '15.00', '', '', True, False),
     ('coca-cola', 'drinks', 'كوكاكولا', 'Coca-Cola', '5.00', '', '', True, False),
     ('sprite', 'drinks', 'سبرايت', 'Sprite', '5.00', '', '', True, False),
-    ('water', 'drinks', 'مياه', 'Water 500ml', '5.00', '', '', True, False),
+    ('water', 'drinks', 'مياه', 'Water 500ml', '5.00', '500 مل', '500 ml', True, False),
+
+    ('vienna-bread', 'extras', 'فينو', 'Vienna Bread', '2.00', '', '', False, False),
 ]
+
+# Sizes exactly as the restaurant's own ordering system stores them: absolute
+# prices, not surcharges. Small first, so the card's "from" price is the small.
+SIZES = {
+    'fries': [('صغير', 'Small', '7.00'), ('كبير', 'Large', '15.00')],
+    'coleslaw': [('صغير', 'Small', '5.00'), ('كبير', 'Large', '8.00')],
+    'corn-mayo': [('صغير', 'Small', '5.00'), ('كبير', 'Large', '8.00')],
+}
+# All eleven sauces share one pair.
+for _sauce in (
+    'fs-sauce', 'cheddar-sauce', 'ranch-sauce', 'buffalo-sauce', 'bbq-sauce',
+    'piccante-sauce', 'dynamite-sauce', 'hot-honey-sauce', 'garlic-cream-sauce',
+    'mac-smoke-sauce', 'creamy-ketch-sauce',
+):
+    SIZES[_sauce] = [('صغير', 'Small', '4.00'), ('كبير', 'Large', '7.00')]
 
 HERO_STATS = [
     ('تُقلى عند الطلب', 'Fried to order', 'clock'),
@@ -196,6 +215,14 @@ class Command(BaseCommand):
 
         site = RestaurantSettings.load()
         site.hero_image_url = f'{IMG}/hero/hero-fries-station.webp'
+        site.og_image_url = f'{IMG}/branding/og-fries-station.webp'
+        # The restaurant's own public pages, confirmed by the owner.
+        site.facebook_url = 'https://www.facebook.com/FriesStation.Rest/'
+        site.instagram_url = 'https://www.instagram.com/friesstation.rest/'
+        # A stand-in so ordering and reservations can be exercised end to end.
+        # Replace it under Settings before the site takes a real order.
+        if not site.whatsapp_number:
+            site.whatsapp_number = '972597862389'
         site.save()
 
         for slug, name_ar, name_en, icon, cover, order in CATEGORIES:
@@ -217,13 +244,15 @@ class Command(BaseCommand):
             slug, cat, name_ar, name_en, price, desc_ar, desc_en, has_photo, featured = row
             if not has_photo:
                 without_photo.append(name_ar)
-            MenuItem.objects.update_or_create(
+            item, _ = MenuItem.objects.update_or_create(
                 name_ar=name_ar,
                 category=categories[cat],
                 defaults={
                     'name_en': name_en,
                     'description_ar': desc_ar,
                     'description_en': desc_en,
+                    # With sizes this is the smallest one, which is what the
+                    # card advertises. The order is priced from the size row.
                     'price': Decimal(price),
                     # An item whose only available picture is the logo is loaded
                     # without one. A logo standing in for a dish tells the
@@ -234,6 +263,19 @@ class Command(BaseCommand):
                     'display_order': order,
                 },
             )
+            wanted = SIZES.get(slug, [])
+            item.sizes.exclude(name_ar__in=[name for name, _, _ in wanted]).delete()
+            for size_order, (size_ar, size_en, size_price) in enumerate(wanted, start=1):
+                MenuItemSize.objects.update_or_create(
+                    menu_item=item,
+                    name_ar=size_ar,
+                    defaults={
+                        'name_en': size_en,
+                        'price': Decimal(size_price),
+                        'display_order': size_order,
+                        'is_available': True,
+                    },
+                )
 
         for order, (ar, en, icon) in enumerate(HERO_STATS, start=1):
             HeroStat.objects.update_or_create(
@@ -260,7 +302,9 @@ class Command(BaseCommand):
             )
 
         self.stdout.write(self.style.SUCCESS(
-            f'Loaded {Category.objects.count()} categories and {MenuItem.objects.count()} items.'
+            f'Loaded {Category.objects.count()} categories, {MenuItem.objects.count()} items '
+            f'and {MenuItemSize.objects.count()} sizes across '
+            f'{MenuItem.objects.filter(sizes__isnull=False).distinct().count()} items.'
         ))
         if without_photo:
             self.stdout.write(self.style.WARNING(

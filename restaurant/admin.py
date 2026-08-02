@@ -7,6 +7,7 @@ from .models import (
     FAQ,
     HeroStat,
     MenuItem,
+    MenuItemSize,
     Offer,
     Order,
     OrderLine,
@@ -94,6 +95,7 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
             'hero_image',
             'hero_image_url',
             'og_image',
+            'og_image_url',
         )}),
         ('قسم من نحن', {'fields': (
             ('about_title_ar', 'about_title_en'),
@@ -170,8 +172,15 @@ class CategoryAdmin(ImagePreviewMixin, admin.ModelAdmin):
     inlines = [MenuItemInline]
 
 
+class MenuItemSizeInline(admin.TabularInline):
+    model = MenuItemSize
+    extra = 0
+    fields = ('name_ar', 'name_en', 'price', 'display_order', 'is_available')
+
+
 @admin.register(MenuItem)
 class MenuItemAdmin(ImagePreviewMixin, admin.ModelAdmin):
+    inlines = [MenuItemSizeInline]
     list_display = (
         'image_preview', 'name_ar', 'category', 'price', 'old_price',
         'is_featured', 'is_available', 'display_order',
@@ -233,7 +242,7 @@ class OrderLineInline(admin.TabularInline):
     extra = 0
     # Prices were computed by the server at order time; showing them as text
     # keeps the admin from becoming a second, weaker way to re-price an order.
-    readonly_fields = ('name_ar', 'quantity', 'unit_price', 'is_priced', 'price_note')
+    readonly_fields = ('name_ar', 'size_label_ar', 'quantity', 'unit_price', 'is_priced', 'price_note')
     can_delete = False
 
     def has_add_permission(self, request, obj=None):

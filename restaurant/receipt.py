@@ -228,7 +228,7 @@ def render_order(order):
     sheet.y += 44
 
     for index, line in enumerate(lines):
-        sheet.rtl(line.name_ar, size=16, x=name_x)
+        sheet.rtl(line.display_name('ar'), size=16, x=name_x)
         sheet.draw.text((qty_x, sheet.y), ar(str(line.quantity)), font=_font(False, 16),
                         fill=INK, anchor='ma')
         if line.is_priced:

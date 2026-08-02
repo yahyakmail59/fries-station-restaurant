@@ -77,7 +77,19 @@
                     <div class="cashier-item-copy">
                         <b>{{ item.name_ar }}</b>
                         <small>{{ item.name_en }}</small>
-                        <strong>{{ item.price|floatformat:'-2' }} {{ site.currency }}</strong>
+                        <strong>{{ item.base_price|floatformat:'-2' }} {{ site.currency }}</strong>
+                        {% if item.available_sizes %}
+                        <div class="cashier-sizes" role="radiogroup" aria-label="حجم {{ item.name_ar }}">
+                            {% for size in item.available_sizes %}
+                            <label>
+                                <input type="radio" name="size_{{ item.pk }}" value="{{ size.pk }}"
+                                       data-price="{{ size.price|unlocalize }}"
+                                       {% if item.selected_size == size.pk or not item.selected_size and forloop.first %}checked{% endif %}>
+                                <span>{{ size.name_ar }} · {{ size.price|floatformat:'-2' }}</span>
+                            </label>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="quantity-control">
                         <button type="button" data-qty-step="-1" aria-label="إنقاص {{ item.name_ar }}">−</button>
@@ -85,7 +97,7 @@
                                name="quantity_{{ item.pk }}"
                                value="{{ item.selected_quantity }}"
                                min="0" max="99" inputmode="numeric"
-                               data-cashier-qty data-price="{{ item.price|unlocalize }}"
+                               data-cashier-qty data-item="{{ item.pk }}" data-price="{{ item.base_price|unlocalize }}"
                                aria-label="كمية {{ item.name_ar }}">
                         <button type="button" data-qty-step="1" aria-label="زيادة {{ item.name_ar }}">+</button>
                     </div>
