@@ -7,7 +7,7 @@ PythonAnywhere هو الخيار الأول لهذا المشروع لأن ال�
 ## 1. القيم المطلوبة قبل البدء
 
 - اسم حساب PythonAnywhere.
-- العنوان المبدئي: `https://<username>.pythonanywhere.com`.
+- العنوان المبدئي: `https://yahyakmail59.pythonanywhere.com`.
 - الدومين النهائي إن وُجد لاحقًا.
 - قيمة سرية طويلة جديدة لـ`DJANGO_SECRET_KEY`.
 - قرار التخزين: `media/` محلي في البداية، أو S3 عند الحاجة.
@@ -30,8 +30,8 @@ python3.11 -m venv .venv
 
 في Web tab:
 
-- Source code: `/home/<username>/fries-station-restaurant`
-- Virtualenv: `/home/<username>/fries-station-restaurant/.venv`
+- Source code: `/home/yahyakmail59/fries-station-restaurant`
+- Virtualenv: `/home/yahyakmail59/fries-station-restaurant/.venv`
 - WSGI: انسخ القيم من `deploy/pythonanywhere_wsgi.py.example` ثم استبدل
   placeholders داخل ملف الخادم فقط.
 
@@ -42,7 +42,7 @@ python3.11 -m venv .venv
 للتثبيت الأول فقط:
 
 ```bash
-cd /home/<username>/fries-station-restaurant
+cd /home/yahyakmail59/fries-station-restaurant
 .venv/bin/python manage.py migrate
 .venv/bin/python manage.py seed_menu
 .venv/bin/python manage.py createsuperuser
@@ -60,8 +60,8 @@ cd /home/<username>/fries-station-restaurant
 
 | URL | Directory |
 |---|---|
-| `/static/` | `/home/<username>/fries-station-restaurant/staticfiles` |
-| `/media/` | `/home/<username>/fries-station-restaurant/media` |
+| `/static/` | `/home/yahyakmail59/fries-station-restaurant/staticfiles` |
+| `/media/` | `/home/yahyakmail59/fries-station-restaurant/media` |
 
 عند استخدام S3 لاحقًا لا تضف mapping محليًا لـ`/media/`، واضبط متغيرات AWS
 في WSGI على الخادم.
@@ -91,16 +91,16 @@ os.environ['DJANGO_SITE_NOINDEX'] = '1'
 أنشئ المجلد مرة واحدة:
 
 ```bash
-mkdir -p /home/<username>/backups/fries-station
+mkdir -p /home/yahyakmail59/backups/fries-station
 ```
 
 قبل كل نشر، استخدم اسمًا زمنيًا واضحًا:
 
 ```bash
-cd /home/<username>/fries-station-restaurant
-sqlite3 db.sqlite3 ".backup '/home/<username>/backups/fries-station/db-before-deploy.sqlite3'"
-tar -czf /home/<username>/backups/fries-station/media-before-deploy.tar.gz media
-git rev-parse HEAD > /home/<username>/backups/fries-station/commit-before-deploy.txt
+cd /home/yahyakmail59/fries-station-restaurant
+sqlite3 db.sqlite3 ".backup '/home/yahyakmail59/backups/fries-station/db-before-deploy.sqlite3'"
+tar -czf /home/yahyakmail59/backups/fries-station/media-before-deploy.tar.gz media
+git rev-parse HEAD > /home/yahyakmail59/backups/fries-station/commit-before-deploy.txt
 ```
 
 لا تضع النسخ الاحتياطية داخل مستودع Git. نزّل نسخة خارج الحساب دوريًا.
@@ -108,7 +108,7 @@ git rev-parse HEAD > /home/<username>/backups/fries-station/commit-before-deploy
 ## 7. نشر تحديث
 
 ```bash
-cd /home/<username>/fries-station-restaurant
+cd /home/yahyakmail59/fries-station-restaurant
 git status --short
 git pull --ff-only origin rebrand/fries-station
 .venv/bin/pip install -r requirements.txt
