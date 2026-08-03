@@ -36,6 +36,8 @@ class LandingPageTests(TestCase):
         self.assertContains(response, 'id="order-address"')
         self.assertNotContains(response, 'class="footer-order"')
         self.assertContains(response, 'id="clear-cart"')
+        self.assertContains(response, 'class="cart-count hidden"')
+        self.assertContains(response, 'class="floating-whatsapp is-empty js-open-cart"')
         self.assertContains(response, 'class="category-card mobile-all-category active"')
         self.assertContains(response, 'id="active-filter-label"')
         self.assertNotContains(response, 'href="#"')
@@ -56,7 +58,24 @@ class LandingPageTests(TestCase):
         response = self.client.get(f"{reverse('restaurant:home')}?lang=en")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session['site_language'], 'en')
-        self.assertContains(response, 'Order on WhatsApp')
+        self.assertContains(response, 'Start your order')
+
+    def test_first_visit_explains_the_order_path_and_delivery_confirmation(self):
+        response = self.client.get(reverse('restaurant:home'))
+        self.assertContains(response, 'id="order-path-title"')
+        self.assertContains(response, 'طلبك في 3 خطوات')
+        self.assertContains(response, 'تراجع الرسالة بنفسك قبل إرسالها')
+        self.assertContains(response, 'إمكانية ورسوم التوصيل تُؤكَّد مع المطعم عبر واتساب')
+        self.assertContains(response, 'href="#featured"')
+
+    def test_empty_marketing_sections_are_hidden_instead_of_showing_negative_proof(self):
+        response = self.client.get(reverse('restaurant:home'))
+        self.assertNotContains(response, 'id="offers"')
+        self.assertNotContains(response, 'id="reviews"')
+        self.assertNotContains(response, 'class="social-section"')
+        self.assertNotContains(response, 'لا توجد عروض متاحة حاليًا')
+        self.assertNotContains(response, 'لا توجد تقييمات منشورة حاليًا')
+        self.assertNotContains(response, 'لا توجد صور منشورة حاليًا')
 
     def test_page_direction_matches_the_selected_language(self):
         arabic_home = self.client.get(f"{reverse('restaurant:home')}?lang=ar")
@@ -170,7 +189,7 @@ class LandingPageTests(TestCase):
         response = self.client.get(f"{reverse('restaurant:home')}?lang=en")
         self.assertContains(response, 'Test Cake')
         self.assertContains(response, 'A dedicated English description')
-        self.assertContains(response, 'Order dish')
+        self.assertContains(response, 'Add to cart')
 
     def test_absolute_open_graph_image_url_is_not_prefixed(self):
         site = RestaurantSettings.load()
@@ -219,15 +238,15 @@ class LandingPageTests(TestCase):
 
     def test_header_order_button_follows_language(self):
         response = self.client.get(f"{reverse('restaurant:home')}?lang=en")
-        self.assertContains(response, '<b>Order on WhatsApp</b>')
+        self.assertContains(response, '<b>Your order</b>')
         response = self.client.get(f"{reverse('restaurant:home')}?lang=ar")
-        self.assertContains(response, '<b>اطلب الآن عبر واتساب</b>')
+        self.assertContains(response, '<b>سلة الطلب</b>')
 
     def test_about_section_and_menu_title_are_rendered(self):
         response = self.client.get(reverse('restaurant:home'))
         self.assertContains(response, 'id="about"')
         self.assertContains(response, 'من نحن')
-        self.assertContains(response, 'استكشف أقسام القائمة')
+        self.assertContains(response, 'اختر قسمك المفضل')
 
     def test_about_section_can_be_hidden(self):
         site = RestaurantSettings.load()
@@ -426,6 +445,7 @@ class LandingPageTests(TestCase):
         self.assertNotContains(response, 'href="#menu"')
 
     def test_main_navigation_follows_the_home_page_section_order(self):
+        Offer.objects.create(title_ar='عرض', title_en='Offer', price_text_ar='20 ₪')
         response = self.client.get(reverse('restaurant:home'))
         html = response.content.decode()
         nav = html[html.index('id="main-nav"'):html.index('</nav>')]
@@ -438,6 +458,7 @@ class LandingPageTests(TestCase):
         site.instagram_url = 'https://www.instagram.com/friesstation.rest/'
         site.facebook_url = 'https://www.facebook.com/friesstation.rest/'
         site.save()
+        SocialPost.objects.create(title='Latest post', image_url='https://cdn.example.com/latest.jpg')
         response = self.client.get(reverse('restaurant:home'))
         self.assertContains(
             response,

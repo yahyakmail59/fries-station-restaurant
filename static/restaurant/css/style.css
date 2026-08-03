@@ -371,6 +371,58 @@ html[dir="ltr"] .hero-ar { direction: rtl; text-align: right; font-family: var(-
 .hero-feature b { font-size: .95rem; }
 .hero-feature small { font: var(--weight-medium) .58rem var(--font-latin); color: var(--text-muted); }
 
+/* ── Order path ─────────────────────────────────────────────────────────── */
+.order-path {
+    padding: 25px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    background: var(--surface-card);
+}
+.order-path-heading { text-align: center; margin-bottom: 17px; }
+.order-path-heading > span {
+    color: var(--brand-primary);
+    font-size: .68rem;
+    font-weight: var(--weight-black);
+}
+.order-path-heading h2 { margin: 2px 0 0; font-size: 1.45rem; }
+.order-path-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.order-path-grid article {
+    min-width: 0;
+    min-height: 82px;
+    padding: 13px;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    background: var(--surface-page);
+    display: grid;
+    grid-template-columns: 30px 30px minmax(0, 1fr);
+    align-items: center;
+    gap: 9px;
+}
+.order-path-grid article > b {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--brand-primary);
+    color: var(--text-on-brand);
+    font: var(--weight-black) .75rem var(--font-latin);
+}
+.order-path-grid article > svg { width: 26px; color: var(--brand-primary); }
+.order-path-grid article > span { min-width: 0; display: grid; }
+.order-path-grid strong { font-size: .82rem; }
+.order-path-grid small { margin-top: 2px; color: var(--text-muted); font-size: .64rem; line-height: 1.5; }
+.order-path-facts {
+    margin-top: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px 22px;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+}
+.order-path-facts span { display: inline-flex; align-items: center; gap: 6px; font-size: .68rem; font-weight: var(--weight-bold); }
+.order-path-facts svg { width: 17px; color: var(--brand-primary); }
+
 /* ── Sections ────────────────────────────────────────────────────────────── */
 .section { padding: var(--space-7) 0; }
 .compact-section { padding-top: var(--space-6); }
@@ -921,27 +973,31 @@ html:not(.icons-ready) .footer-socials button::after { content: "\2706"; font-si
     right: max(22px, env(safe-area-inset-right));
     bottom: max(24px, calc(env(safe-area-inset-bottom) + 12px));
     z-index: 950;
-    width: 58px;
+    width: auto;
+    min-width: 108px;
     height: 58px;
+    padding: 0 14px;
     border: 3px solid var(--surface-card);
     border-radius: 50%;
     background: var(--brand-primary);
     color: var(--text-on-brand);
-    display: grid;
-    place-items: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     cursor: pointer;
     box-shadow: var(--shadow-brand);
     animation: waFloat 2.3s ease-in-out infinite;
 }
+.floating-whatsapp.is-empty { opacity: 0; visibility: hidden; pointer-events: none; }
 .floating-whatsapp svg { width: 28px; }
+.floating-label { font-size: .72rem; font-weight: var(--weight-black); white-space: nowrap; }
 html:not(.icons-ready) .floating-whatsapp::after { content: "\1F6D2"; font-size: 1.4rem; }
 .floating-count {
-    position: absolute;
-    top: -6px;
-    right: -6px;
+    position: static;
     background: var(--brand-accent);
     color: var(--text-on-warm);
-    border: 2px solid var(--surface-card);
+    border: 0;
     border-radius: 50%;
     width: 24px;
     height: 24px;
@@ -1052,6 +1108,23 @@ html:not(.icons-ready) .icon-btn::after { content: "\00D7"; font-size: 1.4rem; }
 .fulfillment-options input:checked + span svg { color: var(--brand-primary); }
 .fulfillment-options input:focus-visible + span { outline: 3px solid var(--focus-ring); outline-offset: 2px; }
 .delivery-fields { padding: var(--space-3); margin-bottom: var(--space-3); border: 1px solid var(--border-brand); border-radius: var(--radius-md); background: var(--surface-card); }
+.delivery-note,
+.checkout-note {
+    margin: 10px 0 0;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--brand-soft);
+    color: var(--brand-deep);
+    display: flex;
+    align-items: flex-start;
+    gap: 7px;
+    font-size: .65rem;
+    font-weight: var(--weight-bold);
+    line-height: 1.55;
+}
+.delivery-note svg,
+.checkout-note svg { width: 17px; height: 17px; flex: 0 0 auto; margin-top: 1px; }
+.checkout-note { background: var(--status-success-bg); color: var(--status-success); }
 .total-row { display: flex; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); font-weight: var(--weight-bold); }
 .total-row strong { color: var(--brand-primary); font-size: 1.05rem; }
 .field-label { display: block; font-size: .72rem; font-weight: var(--weight-bold); margin: 10px 0 4px; }
@@ -1401,6 +1474,8 @@ html[dir="ltr"] .review-arrow.next { right: -47px; left: auto; }
     .hero-title-en { font-size: 2.8rem; }
     .hero-ar, .hero-en { margin-inline: auto; text-align: center; }
     .hero-actions { justify-content: center; }
+    .order-path-grid { grid-template-columns: 1fr; }
+    .order-path-grid article { min-height: 72px; }
     .offers-grid { grid-template-columns: 1fr; }
     .reviews-track { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--space-3); padding: 0 6px var(--space-3); scrollbar-width: thin; }
     .review-card { flex: 0 0 88%; scroll-snap-align: center; }
@@ -1554,7 +1629,9 @@ html[dir="ltr"] .review-arrow.next { right: -47px; left: auto; }
     .social-grid { grid-template-columns: repeat(2, 1fr); }
     .social-card { height: 160px; }
     .footer-grid, .footer-grid.footer-grid-compact { grid-template-columns: 1fr 1fr; gap: var(--space-4); }
-    .floating-whatsapp { width: 52px; height: 52px; right: max(13px, env(safe-area-inset-right)); bottom: max(14px, calc(env(safe-area-inset-bottom) + 8px)); }
+    .floating-whatsapp { width: auto; min-width: 96px; height: 52px; padding-inline: 12px; right: max(13px, env(safe-area-inset-right)); bottom: max(14px, calc(env(safe-area-inset-bottom) + 8px)); }
+    .floating-whatsapp svg { width: 22px; }
+    .floating-label { font-size: .68rem; }
     .messages { top: 76px; width: calc(100% - 20px); }
     .cart-feedback {
         top: 80px;

@@ -100,7 +100,7 @@
                         </div>
                         <button data-item="{{ item.id }}" class="mini-whatsapp js-add-item{% if item.is_featured %} featured-order-btn{% endif %}" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
                             <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
-                            {% if item.is_featured %}<span class="add-label">{% if language == 'ar' %}اطلب الطبق{% else %}Order dish{% endif %}</span>{% endif %}
+                            {% if item.is_featured %}<span class="add-label">{% if language == 'ar' %}أضف للسلة{% else %}Add to cart{% endif %}</span>{% endif %}
                         </button>
                     </div>
                 </div>

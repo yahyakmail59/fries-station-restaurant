@@ -167,7 +167,13 @@
         const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
         const total = cart.reduce((sum, item) => sum + (item.priced ? Number(item.price) * item.qty : 0), 0);
         const hasUnpricedItems = cart.some(item => !item.priced);
-        document.querySelectorAll('.cart-count, .floating-count').forEach(counter => counter.textContent = totalQty);
+        document.querySelectorAll('.cart-count, .floating-count').forEach(counter => {
+            counter.textContent = totalQty;
+            counter.classList.toggle('hidden', totalQty === 0);
+        });
+        document.querySelectorAll('.floating-whatsapp').forEach(button => {
+            button.classList.toggle('is-empty', totalQty === 0);
+        });
         cartTotal.textContent = hasUnpricedItems
             ? (total > 0 ? `${formatPrice(total)} + ${lang === 'ar' ? 'عرض يُؤكد سعره' : 'offer price to confirm'}` : (lang === 'ar' ? 'يُحدد عند التأكيد' : 'Confirmed on contact'))
             : formatPrice(total);
