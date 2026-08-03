@@ -25,7 +25,21 @@ cd fries-station-restaurant
 git switch rebrand/fries-station
 python3.11 -m venv .venv
 .venv/bin/python -m pip install --upgrade pip
-.venv/bin/pip install -r requirements.txt
+.venv/bin/pip install --no-cache-dir -r requirements-pythonanywhere.txt
+```
+
+ملف `requirements-pythonanywhere.txt` مخصص للحساب الحالي ذي المساحة المحدودة؛
+فهو يستخدم SQLite وتخزين الصور محليًا، ولا يثبت حزم PostgreSQL أو S3 الاختيارية.
+
+إذا توقفت محاولة سابقة برسالة `Disk quota exceeded`، احذف البيئة الافتراضية
+الناقصة ونظّف cache الخاص بـpip ثم أعد إنشاءها:
+
+```bash
+rm -rf /home/yahyakmail59/fries-station-restaurant/.venv
+python3.11 -m pip cache purge
+cd /home/yahyakmail59/fries-station-restaurant
+python3.11 -m venv .venv
+.venv/bin/pip install --no-cache-dir -r requirements-pythonanywhere.txt
 ```
 
 في Web tab:
@@ -111,7 +125,7 @@ git rev-parse HEAD > /home/yahyakmail59/backups/fries-station/commit-before-depl
 cd /home/yahyakmail59/fries-station-restaurant
 git status --short
 git pull --ff-only origin rebrand/fries-station
-.venv/bin/pip install -r requirements.txt
+.venv/bin/pip install --no-cache-dir -r requirements-pythonanywhere.txt
 .venv/bin/python manage.py check
 .venv/bin/python manage.py makemigrations --check --dry-run
 .venv/bin/python manage.py migrate

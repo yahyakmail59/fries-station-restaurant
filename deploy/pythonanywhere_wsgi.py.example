@@ -7,7 +7,7 @@ import os
 import sys
 
 
-PROJECT_HOME = '/home/<pythonanywhere-username>/fries-station-restaurant'
+PROJECT_HOME = '/home/yahyakmail59/fries-station-restaurant'
 if PROJECT_HOME not in sys.path:
     sys.path.insert(0, PROJECT_HOME)
 
@@ -16,11 +16,11 @@ os.environ.setdefault('DJANGO_DEBUG', '0')
 os.environ.setdefault('DJANGO_SECRET_KEY', '<replace-on-server>')
 os.environ.setdefault(
     'DJANGO_ALLOWED_HOSTS',
-    '<pythonanywhere-username>.pythonanywhere.com',
+    'yahyakmail59.pythonanywhere.com',
 )
 os.environ.setdefault(
     'DJANGO_CSRF_TRUSTED_ORIGINS',
-    'https://<pythonanywhere-username>.pythonanywhere.com',
+    'https://yahyakmail59.pythonanywhere.com',
 )
 
 # Keep 1 on staging. Change to 0 only when the production domain is ready.
