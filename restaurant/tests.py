@@ -3,8 +3,10 @@ from decimal import Decimal
 
 from django.contrib.auth.models import Permission, User
 from django.core.cache import cache
+from django.db import connection
 from django.forms import modelform_factory
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -337,6 +339,40 @@ class LandingPageTests(TestCase):
         response = self.client.get(reverse('restaurant:home'))
         self.assertNotContains(response, 'unpkg.com')
         self.assertContains(response, 'restaurant/js/lucide-slim.js')
+
+    def test_public_pages_do_not_wait_for_external_fonts(self):
+        response = self.client.get(reverse('restaurant:home'))
+        self.assertNotContains(response, 'fonts.googleapis.com')
+        self.assertNotContains(response, 'fonts.gstatic.com')
+
+    def test_menu_size_queries_are_prefetched(self):
+        category = Category.objects.create(name_ar='سرعة', name_en='Speed')
+        for index in range(15):
+            item = MenuItem.objects.create(
+                category=category,
+                name_ar=f'صنف {index}',
+                name_en=f'Item {index}',
+                price='10.00',
+                is_available=True,
+            )
+            MenuItemSize.objects.create(
+                menu_item=item,
+                name_ar='عادي',
+                name_en='Regular',
+                price='10.00',
+                is_available=True,
+            )
+
+        with CaptureQueriesContext(connection) as home_queries:
+            home_response = self.client.get(reverse('restaurant:home'))
+        with CaptureQueriesContext(connection) as menu_queries:
+            menu_response = self.client.get(reverse('restaurant:menu'))
+
+        self.assertEqual(home_response.status_code, 200)
+        self.assertEqual(menu_response.status_code, 200)
+        self.assertLessEqual(len(home_queries), 20)
+        self.assertLessEqual(len(menu_queries), 20)
+        self.assertEqual(len(home_response.context['menu_items']), 12)
 
     def test_duplicate_reservation_is_not_created(self):
         payload = {

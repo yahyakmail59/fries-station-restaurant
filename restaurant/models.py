@@ -7,6 +7,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator, RegexValidator, URLValidator
 from django.db import models
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 
 
@@ -372,9 +373,9 @@ class MenuItem(TimeStampedModel):
             return self.image.url
         return self.image_url
 
-    @property
+    @cached_property
     def available_sizes(self):
-        """The sizes a customer may actually pick, cheapest first."""
+        """The sizes a customer may actually pick, evaluated once per item."""
         return [size for size in self.sizes.all() if size.is_available]
 
     @property

@@ -66,9 +66,11 @@
     --status-info-bg:    #E8F1FA;
 
     /* ── Typography ────────────────────────────────────────────────────── */
-    --font-display: "Bebas Neue", "Cairo", sans-serif;  /* English headlines */
-    --font-arabic:  "Cairo", sans-serif;                /* Arabic, all weights */
-    --font-latin:   "Montserrat", "Cairo", sans-serif;  /* English body */
+    /* System stacks remove three remote font downloads and render instantly on
+       slow connections while preserving clear Arabic and Latin fallbacks. */
+    --font-display: "Arial Narrow", "Segoe UI", Tahoma, Arial, sans-serif;
+    --font-arabic: Tahoma, "Segoe UI", Arial, sans-serif;
+    --font-latin: "Segoe UI", Arial, Tahoma, sans-serif;
 
     --weight-body: 400;
     --weight-medium: 600;

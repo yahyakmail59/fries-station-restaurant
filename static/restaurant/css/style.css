@@ -473,6 +473,8 @@ html[dir="ltr"] .hero-ar { direction: rtl; text-align: right; font-family: var(-
     background: var(--surface-card);
     direction: inherit;
     box-shadow: var(--shadow-sm);
+    content-visibility: auto;
+    contain-intrinsic-size: 382px;
     transition: transform var(--duration-base) var(--ease-out),
                 box-shadow var(--duration-base) var(--ease-out),
                 border-color var(--duration-base) var(--ease-out);

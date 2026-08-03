@@ -42,10 +42,6 @@
     }
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="{% static 'restaurant/css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
     <style>
@@ -74,7 +70,7 @@
 <header class="site-header" id="top">
     <div class="page-shell header-inner">
         <a class="brand" href="{% if is_menu_page %}{% url 'restaurant:home' %}{% else %}#top{% endif %}" aria-label="{{ site.name_en }}">
-            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/fries-station/branding/logo.webp' %}{% endif %}" alt="{{ site.name_en }}" width="512" height="512">
+            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/fries-station/branding/logo.webp' %}{% endif %}" alt="{{ site.name_en }}" width="512" height="512" decoding="async" fetchpriority="low">
         </a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"

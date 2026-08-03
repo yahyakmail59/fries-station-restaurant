@@ -41,7 +41,7 @@
                 <span class="category-icon"><i data-lucide="{{ category.lucide_icon }}"></i></span>
                 <strong>{% if language == 'ar' %}{{ category.name_ar }}{% else %}{{ category.name_en }}{% endif %}</strong>
                 <small>{% if language == 'ar' %}{{ category.name_en|upper }}{% else %}{{ category.name_ar }}{% endif %}</small>
-                {% if category.image_src %}<img src="{{ category.image_src }}" alt="" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                {% if category.image_src %}<img src="{{ category.image_src }}" alt="" width="960" height="720" loading="lazy" decoding="async" fetchpriority="low">{% endif %}
                 <span class="category-vignette"></span>
             </button>
             {% endfor %}
@@ -70,7 +70,7 @@
             {% for item in menu_items %}
             <article class="menu-card reveal" data-category="{{ item.category.slug }}" data-search="{{ item.name_ar }} {{ item.name_en }} {{ item.description_ar }} {{ item.description_en }}">
                 <div class="menu-image{% if not item.image_src %} menu-image-empty{% endif %}">
-                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async" fetchpriority="low">{% endif %}
                     {% if language == 'ar' and item.badge_ar %}<span class="dish-badge">{{ item.badge_ar }}</span>{% elif language == 'en' and item.badge_en %}<span class="dish-badge">{{ item.badge_en }}</span>{% endif %}
                     <span class="image-sheen"></span>
                 </div>
