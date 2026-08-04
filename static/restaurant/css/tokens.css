@@ -20,6 +20,45 @@
  * 1.63:1 and 2.82:1. Dark ink on warm colour is the brand's own rule.
  */
 
+/* Reem Kufi — the brand face, carrying Arabic and Latin across the storefront.
+ * SIL Open Font License 1.1; the licence text ships beside the file in
+ * static/restaurant/fonts/reem-kufi-OFL.txt, which the OFL requires.
+ *
+ * Self-hosted rather than loaded from Google, because the storefront is tuned
+ * for slow connections and a CDN adds two DNS lookups and a connection before
+ * the first glyph. Subset losslessly from the upstream variable TTF: 667
+ * codepoints in 42 KB, with the weight axis intact, so --weight-medium and
+ * --weight-bold are real interpolated weights rather than smeared outlines.
+ * --weight-black asks for 900 and the axis stops at 700, which the browser
+ * clamps; that is the heaviest this face has.
+ *
+ * The stylesheet was measured against Tahoma and Segoe UI, so the face is
+ * normalised to them rather than the other way round:
+ *   size-adjust     .418em x-height against Segoe UI's .50em, so it would read
+ *                   noticeably small at every declared size.
+ *   ascent/descent  the native 1.10/0.40em metrics build a 1.50em line box, and
+ *                   size-adjust multiplies these two as well, so the pair below
+ *                   resolves to roughly 1.32em against Tahoma's 1.19em.
+ */
+@font-face {
+    font-family: "Reem Kufi";
+    src: url("../fonts/reem-kufi.woff2") format("woff2-variations");
+    font-weight: 400 700;
+    font-style: normal;
+    font-display: swap;
+    size-adjust: 118%;
+    ascent-override: 85%;
+    descent-override: 27%;
+    line-gap-override: 0%;
+}
+
+/* One caveat worth knowing: Reem Kufi has no shekel sign, and every price on the
+ * site ends in one. No rule is needed for it — per-character fallback walks the
+ * stacks below and resolves U+20AA to Tahoma or Segoe UI, verified in the
+ * browser. It is the one glyph that does not carry the brand face, and it
+ * renders at the fallback's own size rather than the adjusted one.
+ */
+
 :root {
     /* ── Brand ─────────────────────────────────────────────────────────── */
     --brand-primary: #D71920;   /* primary action, logo red */
@@ -66,16 +105,17 @@
     --status-info-bg:    #E8F1FA;
 
     /* ── Typography ────────────────────────────────────────────────────── */
-    /* System stacks remove three remote font downloads and render instantly on
-       slow connections while preserving clear Arabic and Latin fallbacks. */
-    --font-display: "Arial Narrow", "Segoe UI", Tahoma, Arial, sans-serif;
-    --font-arabic: Tahoma, "Segoe UI", Arial, sans-serif;
-    --font-latin: "Segoe UI", Arial, Tahoma, sans-serif;
+    /* One self-hosted brand face across all three roles. The system stacks stay
+       behind it as the font-display:swap fallback, so a slow connection paints
+       readable Arabic and Latin on the first frame instead of blank text. */
+    --font-display: "Reem Kufi", "Arial Narrow", "Segoe UI", Tahoma, Arial, sans-serif;
+    --font-arabic: "Reem Kufi", Tahoma, "Segoe UI", Arial, sans-serif;
+    --font-latin: "Reem Kufi", "Segoe UI", Arial, Tahoma, sans-serif;
 
     --weight-body: 400;
     --weight-medium: 600;
     --weight-bold: 700;
-    --weight-black: 900;   /* Cairo Black — Arabic headlines */
+    --weight-black: 900;   /* clamped to the face's 700 ceiling */
 
     --tracking-display: .04em;
     --tracking-kicker: .14em;

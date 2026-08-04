@@ -22,9 +22,9 @@ design-assets/
 .agents/
 .claude/
 
-# Source font downloads. Only the subset webfont under
-# static/restaurant/fonts/ is served, and the originals are large enough to
-# matter against the PythonAnywhere disk quota.
+# Source font downloads. Only the subset woff2 under
+# static/restaurant/fonts/ is served; the upstream TTF/OTF originals are several
+# times its size and would count against the PythonAnywhere disk quota.
 ink-brush-arabic-demo/
 *.otf
 *.ttf
