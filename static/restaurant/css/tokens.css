@@ -20,6 +20,37 @@
  * 1.63:1 and 2.82:1. Dark ink on warm colour is the brand's own rule.
  */
 
+/* Ink Brush Arabic — the brand face, carrying both scripts across the whole
+ * storefront. Subset from the 2.2 MB OTF to the Arabic block, basic Latin and
+ * the punctuation the storefront prints, which lands it at 173 KB. Only the
+ * storefront loads this file; the staff dashboard and Django admin keep their
+ * own stacks.
+ *
+ * Three descriptors keep the rest of the stylesheet honest. The stylesheet was
+ * measured against Tahoma and Segoe UI, so the font is normalised to match them
+ * rather than the other way round:
+ *   size-adjust     the face carries a .40em x-height against Segoe UI's .50em,
+ *                   so it would read a fifth too small at every declared size.
+ *   ascent/descent  the native 1.10/0.64em metrics build a 1.74em line box and
+ *                   would push apart every block that leaves line-height alone.
+ *                   Note these two are scaled by size-adjust as well, so the
+ *                   0.82/0.27 pair below resolves to a 1.31em box against
+ *                   Tahoma's 1.19em — measured, not guessed. Glyphs still paint
+ *                   outside the box, so the brush strokes and the Arabic
+ *                   descenders keep their room.
+ */
+@font-face {
+    font-family: "Ink Brush Arabic";
+    src: url("../fonts/ink-brush-arabic.woff2") format("woff2");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+    size-adjust: 120%;
+    ascent-override: 82%;
+    descent-override: 27%;
+    line-gap-override: 0%;
+}
+
 :root {
     /* ── Brand ─────────────────────────────────────────────────────────── */
     --brand-primary: #D71920;   /* primary action, logo red */
@@ -66,16 +97,21 @@
     --status-info-bg:    #E8F1FA;
 
     /* ── Typography ────────────────────────────────────────────────────── */
-    /* System stacks remove three remote font downloads and render instantly on
-       slow connections while preserving clear Arabic and Latin fallbacks. */
-    --font-display: "Arial Narrow", "Segoe UI", Tahoma, Arial, sans-serif;
-    --font-arabic: Tahoma, "Segoe UI", Arial, sans-serif;
-    --font-latin: "Segoe UI", Arial, Tahoma, sans-serif;
+    /* One brand face across all three roles. The system stacks stay behind it
+       as the swap fallback, so a slow connection still paints readable Arabic
+       and Latin on first frame instead of blank text. */
+    --font-display: "Ink Brush Arabic", "Arial Narrow", "Segoe UI", Tahoma, Arial, sans-serif;
+    --font-arabic: "Ink Brush Arabic", Tahoma, "Segoe UI", Arial, sans-serif;
+    --font-latin: "Ink Brush Arabic", "Segoe UI", Arial, Tahoma, sans-serif;
 
+    /* The face ships a single 400 weight. The weight tokens stay because the
+       fallback stack still honours them during swap, and because the browser
+       synthesises the heavier steps — see the font-synthesis rule in style.css
+       for which of those the brush texture can actually carry. */
     --weight-body: 400;
     --weight-medium: 600;
     --weight-bold: 700;
-    --weight-black: 900;   /* Cairo Black — Arabic headlines */
+    --weight-black: 900;   /* Arabic headlines */
 
     --tracking-display: .04em;
     --tracking-kicker: .14em;

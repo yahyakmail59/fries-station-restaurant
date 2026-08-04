@@ -30,6 +30,14 @@ body {
     font-weight: var(--weight-body);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+
+    /* Ink Brush Arabic ships one weight, and the stylesheet asks for four. The
+       browser would fake the other three by smearing the outline, which on a
+       textured brush face fills in the dry-bristle gaps and turns the heavier
+       steps into blots — worst exactly on the headlines that ask for 900. The
+       hierarchy is carried by size and brand colour instead, both of which this
+       stylesheet already varies from .46rem to 4.4rem. */
+    font-synthesis-weight: none;
 }
 
 html[dir="rtl"] body { direction: rtl; }
