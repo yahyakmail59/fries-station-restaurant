@@ -373,6 +373,14 @@ class MenuItem(TimeStampedModel):
             return self.image.url
         return self.image_url
 
+    @property
+    def image_mobile_src(self):
+        """Return the bundled 480px variant when one is available."""
+        image_prefix = '/static/restaurant/img/fries-station/menu/'
+        if self.image or not self.image_url.startswith(image_prefix) or not self.image_url.endswith('.webp'):
+            return ''
+        return f'{self.image_url[:-5]}-480.webp'
+
     @cached_property
     def available_sizes(self):
         """The sizes a customer may actually pick, evaluated once per item."""

@@ -45,7 +45,7 @@ ITEMS = [
     ('boom-fries', 'fries', 'بوم فرايز', 'Boom Fries', '45.00',
      'فرايز - قطع ستربس - سماش برجر - صوصات - مكس جبن - هاليبينو',
      'Fries, chicken stripes, smash burger, sauces, cheese mix, jalapeño',
-     False, True),
+     True, True),
     ('smash-fries', 'fries', 'سماش فرايز', 'Smash Fries', '40.00',
      'فرايز - دبل سماش برجر - صوصات - مكس جبن - هاليبينو - مخلل',
      'Fries, double smash burger, sauces, cheese mix, jalapeño, pickles',
@@ -57,7 +57,7 @@ ITEMS = [
     ('piccata-fries', 'fries', 'بيكاتا فرايز', 'Piccata Fries', '40.00',
      'فرايز - صدر دجاج - فلفل ألوان - مشروم - ثوم وليمون - ذرة',
      'Fries, chicken breast, bell peppers, mushroom, garlic and lemon, corn',
-     False, False),
+     True, False),
     ('nuggets-fries', 'fries', 'ناجيتس فرايز', 'Nuggets Fries', '37.00',
      'فرايز - سلايز بانيه - صوص سكالوبيني - مكس جبن - زيتون أسود',
      'Fries, breaded chicken slices, scaloppine sauce, cheese mix, black olives',
@@ -77,7 +77,7 @@ ITEMS = [
     ('shrimp-cut-fries', 'fries', 'جمبري فرايز', 'Jumbo Fries', '25.00',
      'جمبري فرايز - مكس صوصات - مكس جبن',
      'Jumbo-cut fries, mixed sauces, cheese mix',
-     False, False),
+     True, False),
 
     ('gold-stripes', 'stripes', 'جولد ستربس', 'Gold Stripes', '40.00',
      '4 قطع ستربس - فرايز - خبز برجر - كول سلو - صوص',
@@ -131,8 +131,8 @@ ITEMS = [
     ('dynamite-sauce', 'sauces', 'ديناميت صوص', 'Dynamite Sauce', '4.00', '', '', True, False),
     ('hot-honey-sauce', 'sauces', 'هوت هني صوص', 'Hot Honey Sauce', '4.00', '', '', True, False),
     ('garlic-cream-sauce', 'sauces', 'كريم ثوم صوص', 'Garlic Cream Sauce', '4.00', '', '', True, False),
-    ('mac-smoke-sauce', 'sauces', 'ماك سموك صوص', 'Mac Smoke Sauce', '4.00', '', '', False, False),
-    ('creamy-ketch-sauce', 'sauces', 'كريمي كاتش صوص', 'Creamy Ketch Sauce', '4.00', '', '', False, False),
+    ('mac-smoke-sauce', 'sauces', 'ماك سموك صوص', 'Mac Smoke Sauce', '4.00', '', '', True, False),
+    ('creamy-ketch-sauce', 'sauces', 'كريمي كاتش صوص', 'Creamy Ketch Sauce', '4.00', '', '', True, False),
 
     ('coleslaw', 'salad', 'كول سلو', 'Coleslaw', '5.00', '', '', True, False),
     ('corn-mayo', 'salad', 'ذرة بالمايونيز', 'Corn with Mayo', '5.00', '', '', True, False),
@@ -148,7 +148,7 @@ ITEMS = [
     ('sprite', 'drinks', 'سبرايت', 'Sprite', '5.00', '', '', True, False),
     ('water', 'drinks', 'مياه', 'Water 500ml', '5.00', '500 مل', '500 ml', True, False),
 
-    ('vienna-bread', 'extras', 'فينو', 'Vienna Bread', '2.00', '', '', False, False),
+    ('vienna-bread', 'extras', 'فينو', 'Vienna Bread', '2.00', '', '', True, False),
 ]
 
 # Sizes exactly as the restaurant's own ordering system stores them: absolute

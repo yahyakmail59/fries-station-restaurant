@@ -103,7 +103,7 @@
             {% for item in menu_items %}
             <article class="menu-card reveal" data-category="{{ item.category.slug }}">
                 <div class="menu-image{% if not item.image_src %} menu-image-empty{% endif %}">
-                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async" fetchpriority="low">{% endif %}
+                    {% if item.image_src %}<img src="{{ item.image_src }}"{% if item.image_mobile_src %} srcset="{{ item.image_mobile_src }} 480w, {{ item.image_src }} 960w" sizes="(max-width: 560px) 118px, (max-width: 820px) 40vw, 300px"{% endif %} alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async" fetchpriority="low">{% endif %}
                     {% if language == 'ar' and item.badge_ar %}<span class="dish-badge">{{ item.badge_ar }}</span>{% elif language == 'en' and item.badge_en %}<span class="dish-badge">{{ item.badge_en }}</span>{% endif %}
                     <span class="image-sheen"></span>
                 </div>
@@ -169,7 +169,7 @@
             {% for item in best_sellers %}
             <article class="menu-card best-seller-card reveal">
                 <div class="menu-image{% if not item.image_src %} menu-image-empty{% endif %}">
-                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                    {% if item.image_src %}<img src="{{ item.image_src }}"{% if item.image_mobile_src %} srcset="{{ item.image_mobile_src }} 480w, {{ item.image_src }} 960w" sizes="(max-width: 560px) 118px, (max-width: 820px) 40vw, 300px"{% endif %} alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
                     <span class="best-seller-rank">#{{ forloop.counter }}</span>
                     <span class="image-sheen"></span>
                 </div>

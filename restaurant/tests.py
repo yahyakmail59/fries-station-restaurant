@@ -42,6 +42,36 @@ class LandingPageTests(TestCase):
         self.assertContains(response, 'id="active-filter-label"')
         self.assertNotContains(response, 'href="#"')
 
+    def test_bundled_menu_images_use_the_small_mobile_variant(self):
+        category = Category.objects.create(name_ar='فرايز', name_en='Fries')
+        item = MenuItem.objects.create(
+            category=category,
+            name_ar='بوم فرايز',
+            name_en='Boom Fries',
+            price='45.00',
+            image_url='/static/restaurant/img/fries-station/menu/boom-fries.webp',
+        )
+
+        response = self.client.get(reverse('restaurant:home'))
+
+        self.assertEqual(
+            item.image_mobile_src,
+            '/static/restaurant/img/fries-station/menu/boom-fries-480.webp',
+        )
+        self.assertContains(response, 'boom-fries-480.webp 480w')
+        self.assertContains(response, 'boom-fries.webp 960w')
+
+    def test_custom_menu_images_do_not_invent_a_mobile_variant(self):
+        category = Category.objects.create(name_ar='فرايز', name_en='Fries')
+        item = MenuItem(
+            category=category,
+            name_ar='صنف مخصص',
+            name_en='Custom Item',
+            price='10.00',
+            image_url='https://images.example.com/custom.webp',
+        )
+        self.assertEqual(item.image_mobile_src, '')
+
     def test_offers_have_order_buttons(self):
         Offer.objects.create(
             title_ar='عرض اختبار',
