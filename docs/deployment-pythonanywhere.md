@@ -121,11 +121,51 @@ git rev-parse HEAD > /home/yahyakmail59/backups/fries-station/commit-before-depl
 
 ## 7. نشر تحديث
 
+الدورة كلها في أمرين، واحد على جهازك وواحد على الخادم.
+
+على جهازك، من Git Bash:
+
+```bash
+bash deploy/push.sh "وصف ما غيّرته"
+```
+
+يشغّل الاختبارات ويفحص migrations الناقصة **قبل** الدفع، فالكسر يظهر وأنت ما
+زلت قادرًا على التراجع بدل أن يظهر على الخادم.
+
+ثم على الخادم من Bash Console:
+
+```bash
+cd ~/fries-station-restaurant && bash deploy/update.sh
+```
+
+`deploy/update.sh` ينفّذ الترتيب الآمن: يرفض العمل إن وُجدت تعديلات محلية على
+الخادم تمنع `--ff-only`، ثم نسخة احتياطية باسم زمني، ثم `check` قبل `migrate`،
+ثم `collectstatic`، ثم يلمس ملف WSGI فيعيد تحميل التطبيق دون فتح تبويب Web.
+
+مرِّر `--clear` حين تحتاج تفريغ الملفات الثابتة المتراكمة:
+
+```bash
+bash deploy/update.sh --clear
+```
+
+يحذف قبل النسخ فتظهر 404 لثوانٍ — نفّذه في وقت هادئ فقط.
+
+بعد انتهاء السكربت راجع Error log وServer log.
+
+عند تغيّر الاعتماديات فقط، أضف قبل تشغيل السكربت:
+
+```bash
+.venv/bin/pip install --no-cache-dir -r requirements-pythonanywhere.txt
+```
+
+### الخطوات يدويًا
+
+إن أردت تنفيذها خطوة خطوة بدل السكربت:
+
 ```bash
 cd /home/yahyakmail59/fries-station-restaurant
 git status --short
 git pull --ff-only origin rebrand/fries-station
-.venv/bin/pip install --no-cache-dir -r requirements-pythonanywhere.txt
 .venv/bin/python manage.py check
 .venv/bin/python manage.py makemigrations --check --dry-run
 .venv/bin/python manage.py migrate

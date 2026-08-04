@@ -1581,6 +1581,23 @@ class ArabicReceiptRenderingTests(TestCase):
             missing = sorted(hex(code) for code in needed - covered)
             self.assertEqual(missing, [], f'{path.name} is missing {missing}')
 
+    def test_the_receipt_font_never_hands_shaping_to_raqm(self):
+        """The text reaches Pillow already shaped and already reversed.
+
+        Pillow picks Raqm whenever the build has it, and Raqm runs its own
+        HarfBuzz shaping and FriBiDi reorder on top, which returns
+        disconnected letters in the wrong order. The Windows wheels used for
+        development have no Raqm and the Linux wheels on the server do, so
+        this only ever broke in production. The engine has to be pinned
+        rather than inherited from whatever the build happens to support.
+        """
+        from PIL import ImageFont
+
+        from .receipt import _font
+
+        for bold in (False, True):
+            self.assertEqual(_font(bold, 19).layout_engine, ImageFont.Layout.BASIC)
+
 
 class OrderUrlPrivacyTests(TestCase):
     """The order page carries a customer's name, phone and address."""

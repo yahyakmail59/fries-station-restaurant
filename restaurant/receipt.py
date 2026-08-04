@@ -4,13 +4,20 @@ Why server-side: the image is only worth sending if its prices come from
 the database. An image drawn in the browser would carry whatever price the
 page happened to hold, which is exactly the value a customer can edit.
 
-Why the reshaping dance: this Pillow build has no Raqm/HarfBuzz, so
-ImageDraw cannot shape Arabic itself. arabic_reshaper converts the text to
-Arabic Presentation Forms-B and python-bidi puts it in visual order, then
-Pillow draws the already-shaped string. That only works with a font that
-covers the presentation-forms block, which is why the bundled font is IBM
-Plex Sans Arabic (140/144) rather than Cairo (89/144, missing the isolated
-letterforms).
+Why the reshaping dance: ImageDraw does not shape Arabic on its own here.
+arabic_reshaper converts the text to Arabic Presentation Forms-B and
+python-bidi puts it in visual order, then Pillow draws the already-shaped
+string. That only works with a font that covers the presentation-forms
+block, which is why the bundled font is IBM Plex Sans Arabic (140/144)
+rather than Cairo (89/144, missing the isolated letterforms).
+
+Why the layout engine is pinned: Pillow reaches for Raqm whenever the build
+has it, and Raqm runs HarfBuzz shaping and a FriBiDi reorder of its own. On
+text that arrives already shaped and already reversed that is a second pass,
+and it hands back disconnected letters in the wrong order. The Windows
+wheels used for development have no Raqm so the receipt looked right there,
+while the Linux wheels on the server bundle it and the receipt came out
+broken. Asking for BASIC makes the drawing identical on both.
 
 The layout is a light card so it stays readable in sunlight and on paper,
 which is where a delivery rider actually reads it.
@@ -47,7 +54,10 @@ GOLD = '#8a6a00'
 
 @lru_cache(maxsize=24)
 def _font(bold, size):
-    return ImageFont.truetype(str(SEMIBOLD if bold else REGULAR), size)
+    return ImageFont.truetype(
+        str(SEMIBOLD if bold else REGULAR), size,
+        layout_engine=ImageFont.Layout.BASIC,
+    )
 
 
 def ar(text):
