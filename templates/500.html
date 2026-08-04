@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>خطأ مؤقت | فرايز ستيشن</title>
-    {# Self-contained on purpose: this page has to render when the application
-       itself has failed, so it depends on nothing but its own markup. #}
+    {% comment %}
+    Self-contained on purpose: this page has to render when the application
+    itself has failed, so it depends on nothing but its own markup.
+    {% endcomment %}
     <style>
         body {
             margin: 0;

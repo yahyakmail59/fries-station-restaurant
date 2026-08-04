@@ -51,6 +51,28 @@
     line-gap-override: 0%;
 }
 
+/* The face has no colon, semicolon, middle dot, ellipsis or shekel sign — the
+ * demo cut omits them. Two of those carry real content: every opening hour is
+ * "11:30" and every price is "45 ₪", so without this rule the browser drops
+ * mid-string into an unscaled system font and the character lands at the wrong
+ * size on the wrong baseline, which is what reads as a broken glyph.
+ *
+ * Declaring them under the same family name with a unicode-range hands exactly
+ * those five characters to a system face, scaled to sit with the brush text:
+ * 88% brings Tahoma's .545em x-height onto the .48em the brush face carries
+ * after its own size-adjust. A later face wins over an earlier one for the
+ * codepoints it claims, so the order here matters. If none of the local fonts
+ * exist — Android and iOS have none of them — the rule simply drops out and the
+ * stack in --font-arabic takes over, which is the behaviour without it.
+ */
+@font-face {
+    font-family: "Ink Brush Arabic";
+    src: local("Tahoma"), local("Segoe UI"), local("Arial"), local("Helvetica"), local("Roboto");
+    unicode-range: U+003A, U+003B, U+00B7, U+2026, U+20AA;
+    font-display: swap;
+    size-adjust: 88%;
+}
+
 :root {
     /* ── Brand ─────────────────────────────────────────────────────────── */
     --brand-primary: #D71920;   /* primary action, logo red */

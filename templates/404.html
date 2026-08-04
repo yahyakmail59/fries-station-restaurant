@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex">
     <title>الصفحة غير موجودة | فرايز ستيشن</title>
-    {# Self-contained on purpose: an error page must render even when the
-       stylesheet or the static pipeline is the thing that is broken. The
-       colours are the brand tokens, written as literals for that reason. #}
+    {% comment %}
+    Self-contained on purpose: an error page must render even when the
+    stylesheet or the static pipeline is the thing that is broken. The
+    colours are the brand tokens, written as literals for that reason.
+    {% endcomment %}
     <style>
         body {
             margin: 0;

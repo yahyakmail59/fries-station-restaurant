@@ -11,9 +11,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
     <style>
-        {# Self-contained like the error pages: a customer opens this from a
-           WhatsApp link, often on a cold cache, and it must render on its own.
-           The values mirror tokens.css. #}
+        {% comment %}
+        Self-contained like the error pages: a customer opens this from a
+        WhatsApp link, often on a cold cache, and it must render on its own.
+        The values mirror tokens.css.
+        {% endcomment %}
         :root {
             --bg: #F5F5F5; --card: #FFFFFF; --line: rgba(34,34,34,.12);
             --ink: #222222; --dim: #555555; --faint: #6B6B6B;

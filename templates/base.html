@@ -42,16 +42,20 @@
     }
     </script>
 
-    {# The brand face carries every word on the page, so it is fetched alongside
-       the stylesheet rather than after it. font-display:swap still paints the
-       system fallback first on a slow connection. #}
+    {% comment %}
+    The brand face carries every word on the page, so it is fetched alongside
+    the stylesheet rather than after it. font-display:swap still paints the
+    system fallback first on a slow connection.
+    {% endcomment %}
     <link rel="preload" href="{% static 'restaurant/fonts/ink-brush-arabic.woff2' %}" as="font" type="font/woff2" crossorigin>
     <link rel="stylesheet" href="{% static 'restaurant/css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
     <style>
-        {# The seven colours the restaurant can edit, written onto the semantic
-           tokens they stand for. Everything else in the stylesheet reads the
-           token, never the setting, so the palette has exactly one entry point. #}
+        {% comment %}
+        The seven colours the restaurant can edit, written onto the semantic
+        tokens they stand for. Everything else in the stylesheet reads the
+        token, never the setting, so the palette has exactly one entry point.
+        {% endcomment %}
         :root {
             --brand-primary: {{ site.primary_color|default:'#D71920' }};
             --brand-accent: {{ site.gold_color|default:'#FFC107' }};
