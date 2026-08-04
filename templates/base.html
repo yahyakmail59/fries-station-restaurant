@@ -31,9 +31,9 @@
       {% if home_abs_url %}"url": "{{ home_abs_url|escapejs }}",{% endif %}
       {% if og_image_url %}"image": "{{ og_image_url|escapejs }}",{% endif %}
       "telephone": "{{ site.tel_phone|escapejs }}",
-      "servesCuisine": ["Middle Eastern", "International"],
+      "servesCuisine": ["Fast Food", "Fried Chicken", "French Fries"],
       "priceRange": "$$",
-      {% if site.instagram_url or site.facebook_url %}"sameAs": [{% if site.instagram_url %}"{{ site.instagram_url|escapejs }}"{% if site.facebook_url %}, {% endif %}{% endif %}{% if site.facebook_url %}"{{ site.facebook_url|escapejs }}"{% endif %}],{% endif %}
+      {% if site.instagram_url or site.facebook_url or site.tiktok_url %}"sameAs": [{% spaceless %}{% if site.instagram_url %}"{{ site.instagram_url|escapejs }}"{% endif %}{% if site.facebook_url %}{% if site.instagram_url %}, {% endif %}"{{ site.facebook_url|escapejs }}"{% endif %}{% if site.tiktok_url %}{% if site.instagram_url or site.facebook_url %}, {% endif %}"{{ site.tiktok_url|escapejs }}"{% endif %}{% endspaceless %}],{% endif %}
       "address": {
         "@type": "PostalAddress",
         "streetAddress": "{% if language == 'ar' %}{{ site.address_ar|escapejs }}{% else %}{{ site.address_en|escapejs }}{% endif %}",
@@ -42,18 +42,28 @@
     }
     </script>
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cairo:wght@400;600;700;800;900&family=Montserrat:wght@500;600;700;800&display=swap" rel="stylesheet"></noscript>
+    {% comment %}
+    The brand face carries every word on the page, so it is fetched alongside
+    the stylesheet rather than discovered after it. font-display:swap still
+    paints the system fallback first on a slow connection.
+    {% endcomment %}
+    <link rel="preload" href="{% static 'restaurant/fonts/reem-kufi.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="{% static 'restaurant/css/tokens.css' %}">
     <link rel="stylesheet" href="{% static 'restaurant/css/style.css' %}">
     <style>
+        {% comment %}
+        The seven colours the restaurant can edit, written onto the semantic
+        tokens they stand for. Everything else in the stylesheet reads the
+        token, never the setting, so the palette has exactly one entry point.
+        {% endcomment %}
         :root {
-            --brand-red: {{ site.primary_color|default:'#E30613' }};
-            --brand-gold: {{ site.gold_color|default:'#D4AF37' }};
-            --page-bg: {{ site.background_color|default:'#050505' }};
-            --surface: {{ site.surface_color|default:'#111111' }};
-            --whatsapp: {{ site.whatsapp_color|default:'#25D366' }};
+            --brand-primary: {{ site.primary_color|default:'#D71920' }};
+            --brand-accent: {{ site.gold_color|default:'#FFC107' }};
+            --brand-deep: {{ site.deep_color|default:'#8C1518' }};
+            --brand-orange: {{ site.orange_color|default:'#FF6D00' }};
+            --surface-page: {{ site.background_color|default:'#F5F5F5' }};
+            --surface-card: {{ site.surface_color|default:'#FFFFFF' }};
+            --status-whatsapp: {{ site.whatsapp_color|default:'#25D366' }};
         }
     </style>
     <script src="{% static 'restaurant/js/lucide-slim.js' %}" defer></script>
@@ -68,7 +78,7 @@
 <header class="site-header" id="top">
     <div class="page-shell header-inner">
         <a class="brand" href="{% if is_menu_page %}{% url 'restaurant:home' %}{% else %}#top{% endif %}" aria-label="{{ site.name_en }}">
-            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/b12-logo-clean.jpg' %}{% endif %}" alt="{{ site.name_en }}" width="890" height="810">
+            <img src="{% if site.logo %}{{ site.logo.url }}{% else %}{% static 'restaurant/img/fries-station/branding/logo.webp' %}{% endif %}" alt="{{ site.name_en }}" width="512" height="512" decoding="async" fetchpriority="low">
         </a>
 
         <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav"
@@ -91,7 +101,7 @@
             <a class="active" href="#hero" aria-current="location"><b>{% if language == 'ar' %}الرئيسية{% else %}Home{% endif %}</b><small>{% if language == 'ar' %}HOME{% else %}الرئيسية{% endif %}</small></a>
             {% if site.show_featured %}<a href="#menu"><b>{% if language == 'ar' %}القائمة{% else %}Menu{% endif %}</b><small>{% if language == 'ar' %}MENU{% else %}القائمة{% endif %}</small></a>{% endif %}
             {% if site.show_featured and best_sellers %}<a href="#best-sellers"><b>{% if language == 'ar' %}الأكثر طلبًا{% else %}Best sellers{% endif %}</b><small>{% if language == 'ar' %}BEST SELLERS{% else %}الأكثر طلبًا{% endif %}</small></a>{% elif site.show_featured %}<a href="#featured"><b>{% if language == 'ar' %}الأطباق{% else %}Dishes{% endif %}</b><small>{% if language == 'ar' %}DISHES{% else %}الأطباق{% endif %}</small></a>{% endif %}
-            {% if site.show_offers %}<a href="#offers"><b>{% if language == 'ar' %}العروض{% else %}Offers{% endif %}</b><small>{% if language == 'ar' %}OFFERS{% else %}العروض{% endif %}</small></a>{% endif %}
+            {% if site.show_offers and offers %}<a href="#offers"><b>{% if language == 'ar' %}العروض{% else %}Offers{% endif %}</b><small>{% if language == 'ar' %}OFFERS{% else %}العروض{% endif %}</small></a>{% endif %}
             {% if site.show_reservation %}<a href="#contact"><b>{% if language == 'ar' %}اتصل بنا{% else %}Contact{% endif %}</b><small>{% if language == 'ar' %}CONTACT{% else %}اتصل بنا{% endif %}</small></a>{% endif %}
             {% if site.show_about %}<a href="#about"><b>{% if language == 'ar' %}من نحن{% else %}About us{% endif %}</b><small>{% if language == 'ar' %}ABOUT US{% else %}من نحن{% endif %}</small></a>{% endif %}
             {% endif %}
@@ -103,8 +113,8 @@
             </div>
             <button class="header-whatsapp js-open-cart" type="button" aria-label="{% if language == 'ar' %}عرض سلة الطلب{% else %}View order cart{% endif %}">
                 <i data-lucide="shopping-cart"></i>
-                <span><b>{% if language == 'ar' %}{{ site.order_cta_ar }}{% else %}{{ site.order_cta_en }}{% endif %}</b><small>{% if language == 'ar' %}{{ site.order_cta_en }}{% else %}{{ site.order_cta_ar }}{% endif %}</small></span>
-                <em class="cart-count">0</em>
+                <span><b>{% if language == 'ar' %}سلة الطلب{% else %}Your order{% endif %}</b><small>{% if language == 'ar' %}YOUR ORDER{% else %}سلة الطلب{% endif %}</small></span>
+                <em class="cart-count hidden">0</em>
             </button>
         </div>
     </div>
@@ -120,8 +130,8 @@
 
 <div class="cart-feedback" id="cart-feedback" role="status" aria-live="polite"></div>
 
-<button class="floating-whatsapp js-open-cart" type="button" aria-label="{% if language == 'ar' %}عرض سلة الطلب{% else %}View order cart{% endif %}">
-    <i data-lucide="shopping-cart"></i><span class="floating-count">0</span>
+<button class="floating-whatsapp is-empty js-open-cart" type="button" aria-label="{% if language == 'ar' %}عرض سلة الطلب{% else %}View order cart{% endif %}">
+    <i data-lucide="shopping-cart"></i><span class="floating-label">{% if language == 'ar' %}طلبك{% else %}Your order{% endif %}</span><span class="floating-count hidden">0</span>
 </button>
 
 <aside class="order-drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="order-title" inert hidden>
@@ -156,9 +166,11 @@
                 <input id="order-phone" type="tel" autocomplete="tel" inputmode="tel">
                 <label class="field-label" for="order-address">{% if language == 'ar' %}عنوان التوصيل{% else %}Delivery address{% endif %}</label>
                 <textarea id="order-address" rows="2" autocomplete="street-address"></textarea>
+                <small class="delivery-note"><i data-lucide="message-circle"></i>{% if language == 'ar' %}إمكانية ورسوم التوصيل تُؤكَّد مع المطعم عبر واتساب قبل اعتماد الطلب.{% else %}Delivery availability and fee are confirmed with the restaurant on WhatsApp before the order is accepted.{% endif %}</small>
             </div>
             <label class="field-label" for="order-notes">{% if language == 'ar' %}ملاحظات الطلب{% else %}Order notes{% endif %}</label>
             <textarea id="order-notes" rows="3"></textarea>
+            <p class="checkout-note"><i data-lucide="star"></i>{% if language == 'ar' %}لن تُرسل الرسالة قبل أن تراجع طلبك وتضغط الزر بنفسك.{% else %}Nothing is sent until you review the order and press the button yourself.{% endif %}</p>
             <button class="btn btn-whatsapp full-width" id="send-whatsapp" type="button"><i data-lucide="send"></i>{% if language == 'ar' %}إرسال عبر واتساب{% else %}Send on WhatsApp{% endif %}</button>
         </div>
     </section>

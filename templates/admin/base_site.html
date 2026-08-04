@@ -3,13 +3,13 @@
 
 {% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
 
-{# Loaded after the admin's own stylesheets so the B12 variables win. #}
+{# Loaded after the admin's own stylesheets so the brand variables win. #}
 {% block extrastyle %}{{ block.super }}
 <link rel="stylesheet" href="{% static 'restaurant/css/admin.css' %}">
 {% endblock %}
 
 {% block branding %}
 <div id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></div>
-{% if user.is_staff %}<a class="b12-desk-link" href="{% url 'restaurant:dashboard' %}">لوحة العملاء ←</a>{% endif %}
+{% if user.is_staff %}<a class="fs-desk-link" href="{% url 'restaurant:dashboard' %}">لوحة العملاء ←</a>{% endif %}
 {% if user.is_anonymous %}{% include "admin/color_theme_toggle.html" %}{% endif %}
 {% endblock %}

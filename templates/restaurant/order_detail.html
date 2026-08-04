@@ -11,10 +11,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap">
     <style>
+        {% comment %}
+        Self-contained like the error pages: a customer opens this from a
+        WhatsApp link, often on a cold cache, and it must render on its own.
+        The values mirror tokens.css.
+        {% endcomment %}
         :root {
-            --bg: #0d0d0d; --card: #141414; --line: #242424;
-            --ink: #ffffff; --dim: #a8a8a8; --faint: #7a7a7a;
-            --gold: #d4af37; --red: #e30613; --wa: #25d366;
+            --bg: #F5F5F5; --card: #FFFFFF; --line: rgba(34,34,34,.12);
+            --ink: #222222; --dim: #555555; --faint: #6B6B6B;
+            --gold: #FFC107; --red: #D71920; --deep: #8C1518; --wa: #25D366;
         }
         * { box-sizing: border-box; }
         body {
@@ -28,21 +33,21 @@
 
         .head { text-align: center; padding-bottom: 20px; }
         .head b { display: block; font-size: 1.2rem; font-weight: 900; }
-        .head small { color: var(--gold); font-size: .8rem; }
+        .head small { color: var(--red); font-size: .8rem; font-weight: 700; }
 
         .code-card {
             background: var(--card); border: 1px solid var(--line); border-radius: 16px;
             padding: 18px; text-align: center; margin-bottom: 14px;
         }
         .code-card span { display: block; font-size: .74rem; color: var(--faint); letter-spacing: .1em; }
-        .code-card b { display: block; font-size: 2rem; font-weight: 900; color: var(--gold); letter-spacing: .05em; }
+        .code-card b { display: block; font-size: 2rem; font-weight: 900; color: var(--red); letter-spacing: .05em; }
         .pill {
             display: inline-block; margin-top: 8px; padding: 4px 13px; border-radius: 999px;
             font-size: .76rem; font-weight: 700;
-            background: rgba(227,6,19,.16); color: #ff7a80;
+            background: rgba(215,25,32,.10); color: var(--red);
         }
-        .pill.pickup { background: rgba(212,175,55,.16); color: var(--gold); }
-        .pill.dine_in { background: rgba(37,211,102,.14); color: var(--wa); }
+        .pill.pickup { background: rgba(255,193,7,.28); color: #6B4A00; }
+        .pill.dine_in { background: rgba(37,211,102,.16); color: #12703A; }
         .status { margin-top: 8px; font-size: .78rem; color: var(--dim); }
 
         .card {
@@ -50,17 +55,17 @@
             padding: 16px 18px; margin-bottom: 14px;
         }
         .card h2 { font-size: .82rem; color: var(--faint); font-weight: 600; margin-bottom: 10px; }
-        .line { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid #1c1c1c; font-size: .92rem; }
+        .line { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: .92rem; }
         .line:last-child { border-bottom: 0; }
         .line em { font-style: normal; color: var(--faint); }
-        .line .quote { color: var(--gold); font-size: .8rem; }
+        .line .quote { color: #6B4A00; font-size: .8rem; }
         .total {
             display: flex; justify-content: space-between; align-items: center;
             margin-top: 12px; padding: 13px 15px; border-radius: 12px;
-            background: rgba(212,175,55,.09); border: 1px solid rgba(212,175,55,.3);
+            background: var(--red); border: 1px solid var(--deep);
         }
-        .total span { color: var(--gold); font-size: .9rem; }
-        .total b { color: var(--gold); font-size: 1.4rem; font-weight: 900; }
+        .total span { color: #FFFFFF; font-size: .9rem; font-weight: 700; }
+        .total b { color: #FFFFFF; font-size: 1.4rem; font-weight: 900; }
         .note { margin-top: 8px; font-size: .76rem; color: var(--faint); }
 
         dl { margin: 0; display: grid; gap: 8px; }
@@ -73,20 +78,20 @@
             display: flex; align-items: center; justify-content: center; gap: 8px;
             min-height: 46px; border-radius: 12px; border: 1px solid var(--line);
             font-size: .86rem; font-weight: 700; color: var(--dim);
-            background: transparent; font-family: inherit; cursor: pointer;
+            background: var(--card); font-family: inherit; cursor: pointer;
         }
-        .receipt-link:hover { color: var(--ink); border-color: var(--gold); }
-        .receipt-link.share { border-color: rgba(37,211,102,.45); color: var(--wa); }
+        .receipt-link:hover { color: var(--red); border-color: var(--red); }
+        .receipt-link.share { border-color: rgba(37,211,102,.55); color: #12703A; }
         .receipt-link.share:hover { border-color: var(--wa); }
         .receipt-link[hidden] { display: none; }
 
         .staff {
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
             padding: 13px 16px; border-radius: 12px;
-            background: rgba(37,211,102,.1); border: 1px solid rgba(37,211,102,.35);
+            background: rgba(37,211,102,.12); border: 1px solid rgba(37,211,102,.42);
             font-size: .84rem;
         }
-        .staff a { color: var(--wa); font-weight: 700; }
+        .staff a { color: #12703A; font-weight: 700; }
         .foot { text-align: center; font-size: .74rem; color: var(--faint); margin-top: 20px; line-height: 1.9; }
     </style>
 </head>

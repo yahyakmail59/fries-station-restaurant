@@ -1,5 +1,5 @@
 {% extends "admin/base_site.html" %}
-{% load i18n static log b12_admin %}
+{% load i18n static log fries_admin %}
 
 {% block coltype %}colMS{% endblock %}
 {% block bodyclass %}{{ block.super }} dashboard{% endblock %}
@@ -9,10 +9,10 @@
 {% block content %}
 <div id="content-main">
 
-    {% b12_admin_stats as stats %}
-    <div class="b12-stats">
+    {% fries_admin_stats as stats %}
+    <div class="fs-stats">
         {% for stat in stats %}
-        <div class="b12-stat{% if stat.urgent %} is-urgent{% endif %}">
+        <div class="fs-stat{% if stat.urgent %} is-urgent{% endif %}">
             <span class="latin">{{ stat.latin }}</span>
             <b>{{ stat.value }}</b>
             <span>{{ stat.label }}</span>
@@ -22,12 +22,12 @@
         {% endfor %}
     </div>
 
-    <p class="b12-section-title">MANAGE CONTENT</p>
+    <p class="fs-section-title">MANAGE CONTENT</p>
 
     {% if app_list %}
-    <div class="b12-apps">
+    <div class="fs-apps">
         {% for app in app_list %}
-        <section class="b12-app">
+        <section class="fs-app">
             <h3><a href="{{ app.app_url }}">{{ app.name }}</a></h3>
             <ul>
                 {% for model in app.models %}

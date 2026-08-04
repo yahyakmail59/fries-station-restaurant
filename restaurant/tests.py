@@ -3,13 +3,16 @@ from decimal import Decimal
 
 from django.contrib.auth.models import Permission, User
 from django.core.cache import cache
+from django.db import connection
 from django.forms import modelform_factory
 from django.test import TestCase, override_settings
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
 from . import crm
 from .models import (
+    MenuItemSize,
     Category, HeroStat, MenuItem, Offer, Order, OrderLine, Reservation, RestaurantSettings,
     SocialPost,
 )
@@ -19,13 +22,13 @@ class LandingPageTests(TestCase):
     def setUp(self):
         cache.clear()
         site = RestaurantSettings.load()
-        site.whatsapp_number = '972597862389'
+        site.whatsapp_number = '970500000000'
         site.save()
 
     def test_home_page_loads(self):
         response = self.client.get(reverse('restaurant:home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'B12')
+        self.assertContains(response, 'فرايز ستيشن')
         self.assertContains(response, 'واتساب')
         self.assertContains(response, 'value="pickup"')
         self.assertContains(response, 'value="delivery"')
@@ -33,9 +36,41 @@ class LandingPageTests(TestCase):
         self.assertContains(response, 'id="order-address"')
         self.assertNotContains(response, 'class="footer-order"')
         self.assertContains(response, 'id="clear-cart"')
+        self.assertContains(response, 'class="cart-count hidden"')
+        self.assertContains(response, 'class="floating-whatsapp is-empty js-open-cart"')
         self.assertContains(response, 'class="category-card mobile-all-category active"')
         self.assertContains(response, 'id="active-filter-label"')
         self.assertNotContains(response, 'href="#"')
+
+    def test_bundled_menu_images_use_the_small_mobile_variant(self):
+        category = Category.objects.create(name_ar='فرايز', name_en='Fries')
+        item = MenuItem.objects.create(
+            category=category,
+            name_ar='بوم فرايز',
+            name_en='Boom Fries',
+            price='45.00',
+            image_url='/static/restaurant/img/fries-station/menu/boom-fries.webp',
+        )
+
+        response = self.client.get(reverse('restaurant:home'))
+
+        self.assertEqual(
+            item.image_mobile_src,
+            '/static/restaurant/img/fries-station/menu/boom-fries-480.webp',
+        )
+        self.assertContains(response, 'boom-fries-480.webp 480w')
+        self.assertContains(response, 'boom-fries.webp 960w')
+
+    def test_custom_menu_images_do_not_invent_a_mobile_variant(self):
+        category = Category.objects.create(name_ar='فرايز', name_en='Fries')
+        item = MenuItem(
+            category=category,
+            name_ar='صنف مخصص',
+            name_en='Custom Item',
+            price='10.00',
+            image_url='https://images.example.com/custom.webp',
+        )
+        self.assertEqual(item.image_mobile_src, '')
 
     def test_offers_have_order_buttons(self):
         Offer.objects.create(
@@ -53,7 +88,24 @@ class LandingPageTests(TestCase):
         response = self.client.get(f"{reverse('restaurant:home')}?lang=en")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.client.session['site_language'], 'en')
-        self.assertContains(response, 'Order on WhatsApp')
+        self.assertContains(response, 'Start your order')
+
+    def test_first_visit_explains_the_order_path_and_delivery_confirmation(self):
+        response = self.client.get(reverse('restaurant:home'))
+        self.assertContains(response, 'id="order-path-title"')
+        self.assertContains(response, 'طلبك في 3 خطوات')
+        self.assertContains(response, 'تراجع الرسالة بنفسك قبل إرسالها')
+        self.assertContains(response, 'إمكانية ورسوم التوصيل تُؤكَّد مع المطعم عبر واتساب')
+        self.assertContains(response, 'href="#featured"')
+
+    def test_empty_marketing_sections_are_hidden_instead_of_showing_negative_proof(self):
+        response = self.client.get(reverse('restaurant:home'))
+        self.assertNotContains(response, 'id="offers"')
+        self.assertNotContains(response, 'id="reviews"')
+        self.assertNotContains(response, 'class="social-section"')
+        self.assertNotContains(response, 'لا توجد عروض متاحة حاليًا')
+        self.assertNotContains(response, 'لا توجد تقييمات منشورة حاليًا')
+        self.assertNotContains(response, 'لا توجد صور منشورة حاليًا')
 
     def test_page_direction_matches_the_selected_language(self):
         arabic_home = self.client.get(f"{reverse('restaurant:home')}?lang=ar")
@@ -92,7 +144,7 @@ class LandingPageTests(TestCase):
             },
         )
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response['Location'].startswith('https://wa.me/972597862389'))
+        self.assertTrue(response['Location'].startswith('https://wa.me/970500000000'))
         self.assertEqual(Reservation.objects.count(), 1)
 
     def test_invalid_reservation_is_not_saved(self):
@@ -167,7 +219,7 @@ class LandingPageTests(TestCase):
         response = self.client.get(f"{reverse('restaurant:home')}?lang=en")
         self.assertContains(response, 'Test Cake')
         self.assertContains(response, 'A dedicated English description')
-        self.assertContains(response, 'Order dish')
+        self.assertContains(response, 'Add to cart')
 
     def test_absolute_open_graph_image_url_is_not_prefixed(self):
         site = RestaurantSettings.load()
@@ -216,15 +268,15 @@ class LandingPageTests(TestCase):
 
     def test_header_order_button_follows_language(self):
         response = self.client.get(f"{reverse('restaurant:home')}?lang=en")
-        self.assertContains(response, '<b>Order on WhatsApp</b>')
+        self.assertContains(response, '<b>Your order</b>')
         response = self.client.get(f"{reverse('restaurant:home')}?lang=ar")
-        self.assertContains(response, '<b>اطلب الآن عبر واتساب</b>')
+        self.assertContains(response, '<b>سلة الطلب</b>')
 
     def test_about_section_and_menu_title_are_rendered(self):
         response = self.client.get(reverse('restaurant:home'))
         self.assertContains(response, 'id="about"')
         self.assertContains(response, 'من نحن')
-        self.assertContains(response, 'استكشف أقسام القائمة')
+        self.assertContains(response, 'اختر قسمك المفضل')
 
     def test_about_section_can_be_hidden(self):
         site = RestaurantSettings.load()
@@ -252,8 +304,17 @@ class LandingPageTests(TestCase):
         self.assertContains(sitemap, '<urlset')
         self.assertContains(sitemap, '/menu/')
 
+    @override_settings(SITE_NOINDEX=True)
+    def test_staging_mode_blocks_indexing_in_headers_and_robots(self):
+        home = self.client.get(reverse('restaurant:home'))
+        robots = self.client.get(reverse('restaurant:robots'))
+
+        self.assertEqual(home['X-Robots-Tag'], 'noindex, nofollow')
+        self.assertContains(robots, 'Disallow: /')
+        self.assertNotContains(robots, 'Sitemap:')
+
     def test_standalone_menu_uses_the_live_catalog_and_cart(self):
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(
             category=category,
             name_ar='وجبة المنيو',
@@ -328,6 +389,40 @@ class LandingPageTests(TestCase):
         self.assertNotContains(response, 'unpkg.com')
         self.assertContains(response, 'restaurant/js/lucide-slim.js')
 
+    def test_public_pages_do_not_wait_for_external_fonts(self):
+        response = self.client.get(reverse('restaurant:home'))
+        self.assertNotContains(response, 'fonts.googleapis.com')
+        self.assertNotContains(response, 'fonts.gstatic.com')
+
+    def test_menu_size_queries_are_prefetched(self):
+        category = Category.objects.create(name_ar='سرعة', name_en='Speed')
+        for index in range(15):
+            item = MenuItem.objects.create(
+                category=category,
+                name_ar=f'صنف {index}',
+                name_en=f'Item {index}',
+                price='10.00',
+                is_available=True,
+            )
+            MenuItemSize.objects.create(
+                menu_item=item,
+                name_ar='عادي',
+                name_en='Regular',
+                price='10.00',
+                is_available=True,
+            )
+
+        with CaptureQueriesContext(connection) as home_queries:
+            home_response = self.client.get(reverse('restaurant:home'))
+        with CaptureQueriesContext(connection) as menu_queries:
+            menu_response = self.client.get(reverse('restaurant:menu'))
+
+        self.assertEqual(home_response.status_code, 200)
+        self.assertEqual(menu_response.status_code, 200)
+        self.assertLessEqual(len(home_queries), 20)
+        self.assertLessEqual(len(menu_queries), 20)
+        self.assertEqual(len(home_response.context['menu_items']), 12)
+
     def test_duplicate_reservation_is_not_created(self):
         payload = {
             'full_name': 'Duplicate Guest',
@@ -344,7 +439,7 @@ class LandingPageTests(TestCase):
 
     def test_relative_static_image_paths_are_valid_in_admin_forms(self):
         site = RestaurantSettings.load()
-        site.hero_image_url = '/static/restaurant/img/v3/hero-b12.webp'
+        site.hero_image_url = '/static/restaurant/img/fries-station/hero/hero-fries-station.webp'
         SiteForm = modelform_factory(RestaurantSettings, fields='__all__')
         site_data = {
             name: (getattr(site, name).name if hasattr(getattr(site, name), 'name') else getattr(site, name))
@@ -355,7 +450,7 @@ class LandingPageTests(TestCase):
         category = Category.objects.create(
             name_ar='صورة محلية',
             name_en='Local image',
-            image_url='/static/restaurant/img/v3/pizza-960.webp',
+            image_url='/static/restaurant/img/fries-station/menu/classic-fries-480.webp',
         )
         CategoryForm = modelform_factory(Category, fields='__all__')
         category_data = {
@@ -380,6 +475,7 @@ class LandingPageTests(TestCase):
         self.assertNotContains(response, 'href="#menu"')
 
     def test_main_navigation_follows_the_home_page_section_order(self):
+        Offer.objects.create(title_ar='عرض', title_en='Offer', price_text_ar='20 ₪')
         response = self.client.get(reverse('restaurant:home'))
         html = response.content.decode()
         nav = html[html.index('id="main-nav"'):html.index('</nav>')]
@@ -389,26 +485,27 @@ class LandingPageTests(TestCase):
 
     def test_social_title_and_branded_buttons_link_to_social_profiles(self):
         site = RestaurantSettings.load()
-        site.instagram_url = 'https://www.instagram.com/b12restaurant/'
-        site.facebook_url = 'https://www.facebook.com/b12restaurant/'
+        site.instagram_url = 'https://www.instagram.com/friesstation.rest/'
+        site.facebook_url = 'https://www.facebook.com/friesstation.rest/'
         site.save()
+        SocialPost.objects.create(title='Latest post', image_url='https://cdn.example.com/latest.jpg')
         response = self.client.get(reverse('restaurant:home'))
         self.assertContains(
             response,
-            'class="social-title" href="https://www.instagram.com/b12restaurant/"',
+            'class="social-title" href="https://www.instagram.com/friesstation.rest/"',
         )
         self.assertContains(
             response,
-            'class="social-facebook" href="https://www.facebook.com/b12restaurant/"',
+            'class="social-facebook" href="https://www.facebook.com/friesstation.rest/"',
         )
         self.assertContains(
             response,
-            'class="social-instagram" href="https://www.instagram.com/b12restaurant/"',
+            'class="social-instagram" href="https://www.instagram.com/friesstation.rest/"',
         )
         self.assertContains(response, 'class="social-whatsapp js-open-cart"')
 
     def test_best_sellers_use_saved_online_and_cashier_order_quantities(self):
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(
             category=category,
             name_ar='كباب الاختبار',
@@ -819,7 +916,7 @@ class AdminSkinTests(TestCase):
     def test_the_start_page_shows_the_stat_tiles(self):
         response = self.client.get(reverse('admin:index'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'class="b12-stats"')
+        self.assertContains(response, 'class="fs-stats"')
         self.assertContains(response, 'حجوزات الليلة')
         self.assertContains(response, 'تنتظر ردًا')
 
@@ -835,9 +932,9 @@ class AdminSkinTests(TestCase):
     def test_every_admin_page_links_to_the_customer_dashboard(self):
         response = self.client.get(reverse('admin:restaurant_reservation_changelist'))
         self.assertContains(response, reverse('restaurant:dashboard'))
-        self.assertContains(response, 'b12-desk-link')
+        self.assertContains(response, 'fs-desk-link')
 
-    def test_the_admin_loads_the_b12_stylesheet(self):
+    def test_the_admin_loads_the_brand_stylesheet(self):
         response = self.client.get(reverse('admin:index'))
         self.assertContains(response, 'restaurant/css/admin.css')
 
@@ -869,7 +966,7 @@ class ControlPanelTests(TestCase):
         RestaurantSettings.load()
         User.objects.create_superuser('boss2', 'b@example.com', 'pw-boss2-1234')
         self.client.login(username='boss2', password='pw-boss2-1234')
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
 
     def test_unknown_section_is_a_404(self):
         response = self.client.get(reverse('restaurant:panel_list', args=['nonsense']))
@@ -878,7 +975,7 @@ class ControlPanelTests(TestCase):
     def test_a_section_lists_its_records(self):
         response = self.client.get(reverse('restaurant:panel_list', args=['categories']))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'مشاوي')
+        self.assertContains(response, 'ستربس')
 
     def test_search_narrows_a_section(self):
         Category.objects.create(name_ar='حلويات', name_en='Sweets')
@@ -886,7 +983,7 @@ class ControlPanelTests(TestCase):
             reverse('restaurant:panel_list', args=['categories']), {'q': 'حلويات'}
         )
         self.assertContains(response, 'حلويات')
-        self.assertNotContains(response, 'مشاوي')
+        self.assertNotContains(response, 'ستربس')
 
     def test_adding_a_record_saves_it(self):
         response = self.client.post(reverse('restaurant:panel_add', args=['offers']), {
@@ -901,23 +998,23 @@ class ControlPanelTests(TestCase):
     def test_editing_a_record_updates_it(self):
         response = self.client.post(
             reverse('restaurant:panel_edit', args=['categories', self.category.pk]),
-            {'name_ar': 'مشاوي شرقية', 'name_en': 'Grills', 'slug': 'grills',
-             'icon': 'skewer', 'image_url': '', 'display_order': 0, 'is_active': 'on'},
+            {'name_ar': 'ستربس حار', 'name_en': 'Stripes', 'slug': 'stripes',
+             'icon': 'chicken', 'image_url': '', 'display_order': 0, 'is_active': 'on'},
         )
         self.assertEqual(response.status_code, 302)
         self.category.refresh_from_db()
-        self.assertEqual(self.category.name_ar, 'مشاوي شرقية')
+        self.assertEqual(self.category.name_ar, 'ستربس حار')
 
     def test_an_invalid_form_redisplays_instead_of_saving(self):
         response = self.client.post(
             reverse('restaurant:panel_edit', args=['categories', self.category.pk]),
-            {'name_ar': '', 'name_en': '', 'slug': '', 'icon': 'skewer',
+            {'name_ar': '', 'name_en': '', 'slug': '', 'icon': 'fries',
              'image_url': '', 'display_order': 0},
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'راجع الحقول')
         self.category.refresh_from_db()
-        self.assertEqual(self.category.name_ar, 'مشاوي')
+        self.assertEqual(self.category.name_ar, 'ستربس')
 
     def test_toggling_a_boolean_flips_it(self):
         self.assertTrue(self.category.is_active)
@@ -976,18 +1073,18 @@ class ControlPanelTests(TestCase):
                     data[name] = 'on'
             else:
                 data[name] = str(value)
-        data['name_ar'] = 'مطعم B12 الجديد'
+        data['name_ar'] = 'فرايز ستيشن الجديد'
 
         response = self.client.post(reverse('restaurant:panel_settings'), data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(RestaurantSettings.load().name_ar, 'مطعم B12 الجديد')
+        self.assertEqual(RestaurantSettings.load().name_ar, 'فرايز ستيشن الجديد')
 
 
 class ControlPanelPermissionTests(TestCase):
     def setUp(self):
         cache.clear()
         RestaurantSettings.load()
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.waiter = User.objects.create_user(
             'waiter2', password='pw-waiter2-1234', is_staff=True
         )
@@ -1001,7 +1098,7 @@ class ControlPanelPermissionTests(TestCase):
         self.waiter.user_permissions.add(Permission.objects.get(codename='view_category'))
         response = self.client.get(reverse('restaurant:panel_list', args=['categories']))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'مشاوي')
+        self.assertContains(response, 'ستربس')
         self.assertNotContains(response, 'btn-danger')
 
     def test_view_permission_alone_cannot_delete(self):
@@ -1027,7 +1124,7 @@ class CashierOrderTests(TestCase):
     def setUp(self):
         cache.clear()
         self.site = RestaurantSettings.load()
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.item = MenuItem.objects.create(
             category=self.category,
             name_ar='كباب',
@@ -1093,9 +1190,9 @@ class OrderPricingTests(TestCase):
     def setUp(self):
         cache.clear()
         site = RestaurantSettings.load()
-        site.whatsapp_number = '972597862389'
+        site.whatsapp_number = '970500000000'
         site.save()
-        self.category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        self.category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.kebab = MenuItem.objects.create(
             category=self.category, name_ar='كباب', name_en='Kebab', price='45.00',
         )
@@ -1218,7 +1315,7 @@ class OrderPricingTests(TestCase):
         data = response.json()
         self.assertIn(data['code'], data['message'])
         self.assertNotIn('90', data['message'])
-        self.assertTrue(data['whatsapp_url'].startswith('https://wa.me/972597862389'))
+        self.assertTrue(data['whatsapp_url'].startswith('https://wa.me/970500000000'))
 
     def test_the_link_sits_alone_so_whatsapp_makes_it_tappable(self):
         """A URL sharing a line with Arabic loses its boundaries to bidi."""
@@ -1251,6 +1348,142 @@ class OrderPricingTests(TestCase):
             self.assertEqual(self._post(payload).status_code, 200)
         self.assertEqual(self._post(payload).status_code, 429)
 
+    def _refusals(self):
+        """One call per way the endpoint can refuse an order."""
+        self.client.post(self.url, data='not json', content_type='application/json')
+        yield self.client.post(self.url, data='not json', content_type='application/json')
+        yield self._post({'items': []})
+        yield self._post({'items': [{'id': str(self.kebab.pk), 'qty': 1}] * 41})
+        yield self._post({'items': [{'id': 'not-a-dish', 'qty': 1}]})
+        yield self._post({
+            'items': [{'id': str(self.kebab.pk), 'qty': 1}],
+            'fulfillment': 'delivery',
+        })
+
+    def test_a_refusal_is_written_in_the_language_the_visitor_chose(self):
+        # An Arabic-only refusal is unreadable to a visitor who switched the
+        # site to English, and these messages are shown verbatim: they are
+        # JSON, so no template gets the chance to translate them.
+        self.client.get(reverse('restaurant:home'), {'lang': 'en'})
+        for response in self._refusals():
+            with self.subTest(status=response.status_code):
+                message = response.json()['error']
+                self.assertNotEqual(message, '')
+                self.assertFalse(
+                    any('؀' <= character <= 'ۿ' for character in message),
+                    f'English visitor was shown Arabic: {message}',
+                )
+
+        cache.clear()
+        self.client.get(reverse('restaurant:home'), {'lang': 'ar'})
+        for response in self._refusals():
+            with self.subTest(status=response.status_code):
+                message = response.json()['error']
+                self.assertTrue(
+                    any('؀' <= character <= 'ۿ' for character in message),
+                    f'Arabic visitor was shown English: {message}',
+                )
+
+
+class ItemSizePricingTests(TestCase):
+    """Sizes carry absolute prices, so the wrong one is a wrong bill."""
+
+    def setUp(self):
+        cache.clear()
+        site = RestaurantSettings.load()
+        site.whatsapp_number = '970500000000'
+        site.save()
+        category = Category.objects.create(name_ar='فرايز', name_en='Fries')
+        self.fries = MenuItem.objects.create(
+            category=category, name_ar='فرايز', name_en='Fries', price=Decimal('7'),
+        )
+        self.small = MenuItemSize.objects.create(
+            menu_item=self.fries, name_ar='صغير', name_en='Small',
+            price=Decimal('7'), display_order=1,
+        )
+        self.large = MenuItemSize.objects.create(
+            menu_item=self.fries, name_ar='كبير', name_en='Large',
+            price=Decimal('15'), display_order=2,
+        )
+        self.other = MenuItem.objects.create(
+            category=category, name_ar='كلاسيك فرايز', name_en='Classic Fries',
+            price=Decimal('25'),
+        )
+        self.url = reverse('restaurant:create_order')
+
+    def _post(self, items):
+        return self.client.post(
+            self.url, data={'items': items}, content_type='application/json',
+        )
+
+    def test_the_chosen_size_sets_the_price(self):
+        self._post([{'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, Decimal('15'))
+        self.assertEqual(order.lines.first().size_label_ar, 'كبير')
+
+    def test_the_card_price_is_the_cheapest_size(self):
+        self.assertEqual(self.fries.base_price, Decimal('7'))
+
+    def test_a_dish_without_sizes_is_unaffected(self):
+        self._post([{'id': str(self.other.pk), 'size': str(self.large.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, Decimal('25'))
+        self.assertEqual(order.lines.first().size_label_ar, '')
+
+    def test_a_size_belonging_to_another_dish_cannot_be_borrowed(self):
+        stray = MenuItemSize.objects.create(
+            menu_item=self.other, name_ar='ضخم', price=Decimal('1'),
+        )
+        self._post([{'id': str(self.fries.pk), 'size': str(stray.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        # Falls back to the cheapest of this dish's own sizes, never the
+        # cheaper row that belongs to something else.
+        self.assertEqual(order.total, Decimal('7'))
+        self.assertEqual(order.lines.first().size_label_ar, 'صغير')
+
+    def test_a_missing_size_never_charges_more_than_the_card_showed(self):
+        self._post([{'id': str(self.fries.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, self.fries.base_price)
+
+    def test_an_unavailable_size_is_not_selectable(self):
+        self.large.is_available = False
+        self.large.save()
+        self._post([{'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1}])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.total, Decimal('7'))
+
+    def test_two_sizes_of_one_dish_are_two_lines(self):
+        self._post([
+            {'id': str(self.fries.pk), 'size': str(self.small.pk), 'qty': 2},
+            {'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1},
+        ])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.lines.count(), 2)
+        self.assertEqual(order.total, Decimal('29'))
+
+    def test_the_same_size_twice_is_merged(self):
+        self._post([
+            {'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1},
+            {'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 2},
+        ])
+        order = Order.objects.latest('created_at')
+        self.assertEqual(order.lines.count(), 1)
+        self.assertEqual(order.lines.first().quantity, 3)
+
+    def test_a_price_sent_beside_the_size_is_still_ignored(self):
+        self._post([{
+            'id': str(self.fries.pk), 'size': str(self.small.pk), 'qty': 1, 'price': '0.01',
+        }])
+        self.assertEqual(Order.objects.latest('created_at').total, Decimal('7'))
+
+    def test_the_size_is_written_on_the_line_the_customer_reads(self):
+        self._post([{'id': str(self.fries.pk), 'size': str(self.large.pk), 'qty': 1}])
+        line = Order.objects.latest('created_at').lines.first()
+        self.assertEqual(line.display_name('ar'), 'فرايز — كبير')
+        self.assertEqual(line.display_name('en'), 'Fries — Large')
+
 
 class OrderCodeTests(TestCase):
     def setUp(self):
@@ -1263,7 +1496,7 @@ class OrderCodeTests(TestCase):
 
     def test_the_code_avoids_characters_that_are_misread_aloud(self):
         for _ in range(30):
-            body = Order.objects.create().code.removeprefix('B12-')
+            body = Order.objects.create().code.removeprefix(f'{Order.CODE_PREFIX}-')
             self.assertFalse(set(body) & set('IO01'))
 
 
@@ -1271,7 +1504,7 @@ class OrderPagesTests(TestCase):
     def setUp(self):
         cache.clear()
         RestaurantSettings.load()
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         item = MenuItem.objects.create(
             category=category, name_ar='كباب', name_en='Kebab', price='45.00',
         )
@@ -1335,13 +1568,13 @@ class ArabicReceiptRenderingTests(TestCase):
         from .receipt import REGULAR, SEMIBOLD
 
         sample = (
-            'رقم الطلب الإجمالي كباب مشوي مشكل عصير ليمون بالنعناع بيتزا '
+            'رقم الطلب الإجمالي سماش برجر فرايز ستربس تشيروز عصير الموسم '
             'استلام من المطعم ديليفري الاسم الجوال العنوان ملاحظات '
             'صدرت هذه الفاتورة من موقع المطعم والأسعار محسوبة على الخادم '
             'للتأكد ابحث عن الرقم في لوحة المطعم يحدد عند التأكيد بدون بصل'
         )
         needed = {ord(character) for character in arabic_reshaper.reshape(sample)}
-        needed |= {ord(character) for character in 'B12-ACDEFGHJKLMNPQRSTUVWXYZ0123456789 ₪×·/:'}
+        needed |= {ord(character) for character in Order.CODE_PREFIX + '-ACDEFGHJKLMNPQRSTUVWXYZ0123456789 ₪×·/:'}
 
         for path in (REGULAR, SEMIBOLD):
             covered = set(TTFont(str(path)).getBestCmap().keys())
@@ -1355,7 +1588,7 @@ class OrderUrlPrivacyTests(TestCase):
     def setUp(self):
         cache.clear()
         RestaurantSettings.load()
-        category = Category.objects.create(name_ar='مشاوي', name_en='Grills')
+        category = Category.objects.create(name_ar='ستربس', name_en='Stripes')
         self.item = MenuItem.objects.create(
             category=category, name_ar='كباب', name_en='Kebab', price='45.00',
         )

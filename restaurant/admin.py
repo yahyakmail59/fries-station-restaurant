@@ -7,6 +7,7 @@ from .models import (
     FAQ,
     HeroStat,
     MenuItem,
+    MenuItemSize,
     Offer,
     Order,
     OrderLine,
@@ -39,12 +40,19 @@ class RestaurantSettingsAdminForm(forms.ModelForm):
 
     def clean(self):
         cleaned = super().clean()
+        # Each colour is checked against the text colour it actually carries on
+        # the page, not against a fixed reference. The two reds are backgrounds
+        # for white text; the warm colours and the light surfaces are
+        # backgrounds for dark ink. Checking yellow against white would demand a
+        # yellow no customer would recognise as the brand's.
         checks = [
-            ('primary_color', '#FFFFFF', 'اللون الأحمر يجب أن يكون واضحًا مع النص الأبيض.'),
-            ('background_color', '#FFFFFF', 'لون الخلفية يجب أن يكون واضحًا مع النص الأبيض.'),
-            ('surface_color', '#FFFFFF', 'لون البطاقات يجب أن يكون واضحًا مع النص الأبيض.'),
-            ('gold_color', '#050505', 'اللون الذهبي يجب أن يكون واضحًا على الخلفية الداكنة.'),
-            ('whatsapp_color', '#050505', 'لون واتساب يجب أن يكون واضحًا مع النص الداكن.'),
+            ('primary_color', '#FFFFFF', 'الأحمر الأساسي يجب أن يكون واضحًا مع النص الأبيض فوقه.'),
+            ('deep_color', '#FFFFFF', 'الأحمر الداكن يجب أن يكون واضحًا مع النص الأبيض فوقه.'),
+            ('gold_color', '#222222', 'الأصفر المميز يجب أن يكون واضحًا مع النص الداكن فوقه.'),
+            ('orange_color', '#222222', 'البرتقالي يجب أن يكون واضحًا مع النص الداكن فوقه.'),
+            ('background_color', '#222222', 'خلفية الصفحة يجب أن تكون واضحة مع النص الداكن فوقها.'),
+            ('surface_color', '#222222', 'لون البطاقات يجب أن يكون واضحًا مع النص الداكن فوقه.'),
+            ('whatsapp_color', '#222222', 'لون واتساب يجب أن يكون واضحًا مع النص الداكن فوقه.'),
         ]
         for field_name, text_color, message in checks:
             value = cleaned.get(field_name)
@@ -53,8 +61,8 @@ class RestaurantSettingsAdminForm(forms.ModelForm):
         return cleaned
 
 
-admin.site.site_header = 'B12 Restaurant — لوحة الإدارة'
-admin.site.site_title = 'B12 Admin'
+admin.site.site_header = 'فرايز ستيشن — لوحة الإدارة'
+admin.site.site_title = 'Fries Station Admin'
 admin.site.index_title = 'إدارة الموقع والمحتوى والطلبات'
 
 
@@ -65,7 +73,7 @@ class ImagePreviewMixin:
         if not src:
             return '—'
         return format_html(
-            '<img src="{}" style="width:74px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #444" alt="">',
+            '<img src="{}" style="width:74px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #d3cfcc" alt="">',
             src,
         )
 
@@ -75,8 +83,9 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
     form = RestaurantSettingsAdminForm
     fieldsets = (
         ('الهوية', {'fields': ('name_ar', 'name_en', 'tagline_ar', 'tagline_en', 'logo')}),
-        ('ألوان الواجهة', {'fields': (
+        ('ألوان الهوية', {'fields': (
             ('primary_color', 'gold_color'),
+            ('deep_color', 'orange_color'),
             ('background_color', 'surface_color'),
             'whatsapp_color',
         )}),
@@ -86,6 +95,7 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
             'hero_image',
             'hero_image_url',
             'og_image',
+            'og_image_url',
         )}),
         ('قسم من نحن', {'fields': (
             ('about_title_ar', 'about_title_en'),
@@ -119,7 +129,7 @@ class RestaurantSettingsAdmin(admin.ModelAdmin):
             'max_reservation_days_ahead',
         )}),
         ('التواصل الاجتماعي والتذييل', {'fields': (
-            'instagram_url', 'facebook_url',
+            'instagram_url', 'facebook_url', 'tiktok_url',
             ('footer_text_ar', 'footer_text_en'),
         )}),
         ('SEO والمشاركة', {'classes': ('collapse',), 'fields': (
@@ -162,8 +172,15 @@ class CategoryAdmin(ImagePreviewMixin, admin.ModelAdmin):
     inlines = [MenuItemInline]
 
 
+class MenuItemSizeInline(admin.TabularInline):
+    model = MenuItemSize
+    extra = 0
+    fields = ('name_ar', 'name_en', 'price', 'display_order', 'is_available')
+
+
 @admin.register(MenuItem)
 class MenuItemAdmin(ImagePreviewMixin, admin.ModelAdmin):
+    inlines = [MenuItemSizeInline]
     list_display = (
         'image_preview', 'name_ar', 'category', 'price', 'old_price',
         'is_featured', 'is_available', 'display_order',
@@ -225,7 +242,7 @@ class OrderLineInline(admin.TabularInline):
     extra = 0
     # Prices were computed by the server at order time; showing them as text
     # keeps the admin from becoming a second, weaker way to re-price an order.
-    readonly_fields = ('name_ar', 'quantity', 'unit_price', 'is_priced', 'price_note')
+    readonly_fields = ('name_ar', 'size_label_ar', 'quantity', 'unit_price', 'is_priced', 'price_note')
     can_delete = False
 
     def has_add_permission(self, request, obj=None):

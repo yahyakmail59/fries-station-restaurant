@@ -1,0 +1,9 @@
+# Lightweight dependencies for the PythonAnywhere staging deployment.
+# SQLite and local media are used here, so PostgreSQL, S3, boto3, and
+# gunicorn are intentionally omitted.
+Django==5.2.16
+Pillow>=11.0,<13.0
+arabic-reshaper>=3.0,<4.0
+python-bidi>=0.6,<0.7
+whitenoise>=6.9,<7.0
+dj-database-url>=3.0,<4.0

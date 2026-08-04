@@ -17,6 +17,7 @@ from .forms import ReservationForm
 from .models import Category, FAQ, HeroStat, MenuItem, Offer, Reservation, RestaurantSettings, Service, SocialPost, Testimonial
 
 logger = logging.getLogger(__name__)
+HOMEPAGE_MENU_LIMIT = 12
 
 
 def _language(request):
@@ -55,10 +56,13 @@ def _best_sellers(available_items):
     ).filter(order_count__gt=0).order_by('-order_count', 'display_order', 'id')[:4]
 
 
-def _home_context(request, reservation_form=None, language=None):
+def _home_context(request, reservation_form=None, language=None, settings_obj=None):
     language = language or _language(request)
-    settings_obj = RestaurantSettings.load()
-    available_items = MenuItem.objects.filter(is_available=True).select_related('category')
+    settings_obj = settings_obj or RestaurantSettings.load()
+    available_items = MenuItem.objects.filter(
+        is_available=True,
+        category__is_active=True,
+    ).select_related('category').prefetch_related('sizes')
 
     return {
         'language': language,
@@ -67,7 +71,11 @@ def _home_context(request, reservation_form=None, language=None):
         'og_image_url': _absolute_media_url(request, settings_obj.og_image_src),
         'hero_stats': HeroStat.objects.filter(is_active=True),
         'categories': Category.objects.filter(is_active=True),
-        'menu_items': available_items.order_by('-is_featured', 'display_order', 'id'),
+        # Keep the landing page light. The dedicated menu remains the complete
+        # catalogue and is linked immediately below these priority items.
+        'menu_items': available_items.order_by(
+            '-is_featured', 'display_order', 'id',
+        )[:HOMEPAGE_MENU_LIMIT],
         'best_sellers': _best_sellers(available_items),
         'offers': Offer.objects.filter(is_active=True),
         'services': Service.objects.filter(is_active=True),
@@ -88,22 +96,27 @@ def home(request):
     return render(
         request,
         'restaurant/home.html',
-        _home_context(request, reservation_form=reservation_form, language=language),
+        _home_context(
+            request,
+            reservation_form=reservation_form,
+            language=language,
+            settings_obj=settings_obj,
+        ),
     )
 
 
 def menu_page(request):
     language = _language(request)
     site = RestaurantSettings.load()
-    categories = Category.objects.filter(is_active=True)
+    categories = list(Category.objects.filter(is_active=True))
     available_items = MenuItem.objects.filter(
         is_available=True,
         category__is_active=True,
-    ).select_related('category')
+    ).select_related('category').prefetch_related('sizes')
     requested_category = request.GET.get('category', '')
     active_category = (
         requested_category
-        if requested_category and categories.filter(slug=requested_category).exists()
+        if requested_category and any(category.slug == requested_category for category in categories)
         else 'all'
     )
     page_abs_url = request.build_absolute_uri(reverse('restaurant:menu'))
@@ -201,7 +214,7 @@ def create_reservation(request):
     _notify_new_reservation(reservation)
     if language == 'ar':
         text = (
-            'مرحبًا B12، أرسلت طلب حجز طاولة عبر الموقع:\n'
+            f'مرحبًا {site.name_ar}، أرسلت طلب حجز طاولة عبر الموقع:\n'
             f'الاسم: {reservation.full_name}\n'
             f'الهاتف: {reservation.phone}\n'
             f'التاريخ: {reservation.date}\n'
@@ -212,7 +225,7 @@ def create_reservation(request):
         )
     else:
         text = (
-            'Hello B12, I submitted a table reservation request on the website:\n'
+            f'Hello {site.name_en}, I submitted a table reservation request on the website:\n'
             f'Name: {reservation.full_name}\n'
             f'Phone: {reservation.phone}\n'
             f'Date: {reservation.date}\n'
@@ -250,6 +263,11 @@ def _notify_new_reservation(reservation):
 
 @require_GET
 def robots_txt(request):
+    if settings.SITE_NOINDEX:
+        return HttpResponse(
+            'User-agent: *\nDisallow: /',
+            content_type='text/plain',
+        )
     sitemap_url = request.build_absolute_uri(reverse('restaurant:sitemap'))
     lines = [
         'User-agent: *',

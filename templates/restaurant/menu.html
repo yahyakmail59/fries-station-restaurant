@@ -41,7 +41,7 @@
                 <span class="category-icon"><i data-lucide="{{ category.lucide_icon }}"></i></span>
                 <strong>{% if language == 'ar' %}{{ category.name_ar }}{% else %}{{ category.name_en }}{% endif %}</strong>
                 <small>{% if language == 'ar' %}{{ category.name_en|upper }}{% else %}{{ category.name_ar }}{% endif %}</small>
-                {% if category.image_src %}<img src="{{ category.image_src }}" alt="" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                {% if category.image_src %}<img src="{{ category.image_src }}" alt="" width="960" height="720" loading="lazy" decoding="async" fetchpriority="low">{% endif %}
                 <span class="category-vignette"></span>
             </button>
             {% endfor %}
@@ -69,8 +69,8 @@
         <div class="menu-grid menu-page-grid" id="menu-grid" data-page-size="6">
             {% for item in menu_items %}
             <article class="menu-card reveal" data-category="{{ item.category.slug }}" data-search="{{ item.name_ar }} {{ item.name_en }} {{ item.description_ar }} {{ item.description_en }}">
-                <div class="menu-image">
-                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                <div class="menu-image{% if not item.image_src %} menu-image-empty{% endif %}">
+                    {% if item.image_src %}<img src="{{ item.image_src }}"{% if item.image_mobile_src %} srcset="{{ item.image_mobile_src }} 480w, {{ item.image_src }} 960w" sizes="(max-width: 560px) 118px, (max-width: 820px) 40vw, 300px"{% endif %} alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async" fetchpriority="low">{% endif %}
                     {% if language == 'ar' and item.badge_ar %}<span class="dish-badge">{{ item.badge_ar }}</span>{% elif language == 'en' and item.badge_en %}<span class="dish-badge">{{ item.badge_en }}</span>{% endif %}
                     <span class="image-sheen"></span>
                 </div>
@@ -78,14 +78,29 @@
                     <h3>{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}</h3>
                     <h4>{% if language == 'ar' %}{{ item.name_en|upper }}{% else %}{{ item.name_ar }}{% endif %}</h4>
                     <p>{% if language == 'ar' %}{{ item.description_ar|truncatechars:105 }}{% else %}{{ item.description_en|default:item.description_ar|truncatechars:105 }}{% endif %}</p>
+                    {% if item.available_sizes %}
+                    <div class="size-picker" role="radiogroup" aria-label="{% if language == 'ar' %}اختر الحجم{% else %}Choose a size{% endif %}">
+                        {% for size in item.available_sizes %}
+                        <label>
+                            <input type="radio" name="size-{{ item.id }}" value="{{ size.id }}"
+                                   data-price="{{ size.price|unlocalize }}"
+                                   data-size-ar="{{ size.name_ar|escape }}"
+                                   data-size-en="{{ size.name_en|default:size.name_ar|escape }}"
+                                   {% if forloop.first %}checked{% endif %}>
+                            <span>{% if language == 'ar' %}{{ size.name_ar }}{% else %}{{ size.name_en|default:size.name_ar }}{% endif %}
+                                <b>{{ size.price|floatformat:-2 }}</b></span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                     <div class="menu-bottom">
                         <div class="price-wrap">
                             {% if item.old_price %}<del>{{ item.old_price|floatformat:-2 }}</del>{% endif %}
-                            <strong>{{ item.price|floatformat:-2 }} <small>{{ site.currency }}</small></strong>
+                            <strong>{{ item.base_price|floatformat:-2 }} <small>{{ site.currency }}</small></strong>
                         </div>
-                        <button class="mini-whatsapp js-add-item{% if item.is_featured %} featured-order-btn{% endif %}" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
+                        <button data-item="{{ item.id }}" class="mini-whatsapp js-add-item{% if item.is_featured %} featured-order-btn{% endif %}" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
                             <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
-                            {% if item.is_featured %}<span class="add-label">{% if language == 'ar' %}اطلب الطبق{% else %}Order dish{% endif %}</span>{% endif %}
+                            {% if item.is_featured %}<span class="add-label">{% if language == 'ar' %}أضف للسلة{% else %}Add to cart{% endif %}</span>{% endif %}
                         </button>
                     </div>
                 </div>
@@ -122,7 +137,7 @@
             {% for item in best_sellers %}
             <article class="menu-spotlight-card reveal">
                 <div class="menu-spotlight-image">
-                    {% if item.image_src %}<img src="{{ item.image_src }}" alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
+                    {% if item.image_src %}<img src="{{ item.image_src }}"{% if item.image_mobile_src %} srcset="{{ item.image_mobile_src }} 480w, {{ item.image_src }} 960w" sizes="(max-width: 560px) 118px, (max-width: 820px) 40vw, 300px"{% endif %} alt="{% if language == 'ar' %}{{ item.name_ar }}{% else %}{{ item.name_en }}{% endif %}" width="960" height="720" loading="lazy" decoding="async">{% endif %}
                     <span>#{{ forloop.counter }}</span>
                 </div>
                 <div class="menu-spotlight-copy">
@@ -130,7 +145,7 @@
                     <small><i data-lucide="flame"></i>{{ item.order_count }} {% if language == 'ar' %}طلب{% else %}orders{% endif %}</small>
                     <div>
                         <strong>{{ item.price|floatformat:-2 }} <em>{{ site.currency }}</em></strong>
-                        <button class="mini-whatsapp js-add-item" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
+                        <button data-item="{{ item.id }}" class="mini-whatsapp js-add-item" type="button" data-id="{{ item.id }}" data-name-ar="{{ item.name_ar|escape }}" data-name-en="{{ item.name_en|escape }}" data-price="{{ item.price|unlocalize }}" aria-label="{% if language == 'ar' %}أضف {{ item.name_ar }} إلى السلة{% else %}Add {{ item.name_en }} to cart{% endif %}">
                             <i data-lucide="shopping-cart"></i><span class="cart-plus" aria-hidden="true">+</span>
                         </button>
                     </div>

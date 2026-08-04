@@ -12,6 +12,7 @@ from django.utils import timezone
 
 from . import panel
 from .models import MenuItem, Order, OrderLine, RestaurantSettings
+from .views_order import _resolve_price
 
 MAX_LINES = 40
 MAX_QUANTITY = 99
@@ -39,16 +40,19 @@ def _today_stats():
     }
 
 
-def _context(request, *, selected=None, values=None):
+def _context(request, *, selected=None, values=None, sizes=None):
     site = RestaurantSettings.load()
     selected = selected or {}
     items = list(
         MenuItem.objects.filter(is_available=True).select_related(
             'category'
-        ).order_by('category__display_order', 'category__id', 'display_order', 'id')
+        ).prefetch_related('sizes').order_by(
+            'category__display_order', 'category__id', 'display_order', 'id'
+        )
     )
     for item in items:
         item.selected_quantity = selected.get(item.pk, 0)
+        item.selected_size = (sizes or {}).get(item.pk)
 
     created_order = None
     created_token = request.GET.get('created', '')
@@ -85,11 +89,16 @@ def cashier(request):
         return render(request, 'restaurant/cashier.html', _context(request))
 
     available_items = list(
-        MenuItem.objects.filter(is_available=True).select_related('category')
+        MenuItem.objects.filter(is_available=True)
+        .select_related('category').prefetch_related('sizes')
     )
     selected = {}
+    chosen_sizes = {}
     invalid_quantity = False
     for item in available_items:
+        raw_size = request.POST.get(f'size_{item.pk}', '')
+        if raw_size.isdigit():
+            chosen_sizes[item.pk] = int(raw_size)
         raw_quantity = request.POST.get(f'quantity_{item.pk}', '0')
         try:
             quantity = int(raw_quantity or 0)
@@ -145,14 +154,19 @@ def cashier(request):
                 quantity = selected.get(item.pk)
                 if not quantity:
                     continue
-                total += item.price * quantity
+                unit_price, label_ar, label_en = _resolve_price(
+                    item, chosen_sizes.get(item.pk)
+                )
+                total += unit_price * quantity
                 lines.append(OrderLine(
                     order=order,
                     menu_item=item,
                     name_ar=item.name_ar,
                     name_en=item.name_en,
+                    size_label_ar=label_ar,
+                    size_label_en=label_en,
                     quantity=quantity,
-                    unit_price=item.price,
+                    unit_price=unit_price,
                     is_priced=True,
                 ))
             OrderLine.objects.bulk_create(lines)
@@ -167,6 +181,6 @@ def cashier(request):
     return render(
         request,
         'restaurant/cashier.html',
-        _context(request, selected=selected, values=values),
+        _context(request, selected=selected, values=values, sizes=chosen_sizes),
         status=400,
     )

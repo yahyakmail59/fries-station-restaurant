@@ -35,6 +35,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'restaurant.middleware.SiteNoIndexMiddleware',
     # Compress dynamic HTML/JSON responses. Static assets are compressed by
     # collectstatic and served directly by PythonAnywhere.
     'django.middleware.gzip.GZipMiddleware',
@@ -144,7 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION', 'b12-restaurant'),
+        'LOCATION': os.environ.get('DJANGO_CACHE_LOCATION', 'fries-station'),
         'TIMEOUT': int(os.environ.get('DJANGO_CACHE_TIMEOUT', '300')),
         'OPTIONS': {
             'MAX_ENTRIES': int(os.environ.get('DJANGO_CACHE_MAX_ENTRIES', '2000')),
@@ -184,3 +185,7 @@ X_FRAME_OPTIONS = 'DENY'
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 FILE_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DJANGO_FILE_UPLOAD_MAX_MEMORY_SIZE', str(5 * 1024 * 1024)))
 DATA_UPLOAD_MAX_MEMORY_SIZE = int(os.environ.get('DJANGO_DATA_UPLOAD_MAX_MEMORY_SIZE', str(8 * 1024 * 1024)))
+
+# Enable on staging so search engines cannot index the temporary environment.
+# Production leaves this off and uses the normal robots/sitemap responses.
+SITE_NOINDEX = os.environ.get('DJANGO_SITE_NOINDEX', '0') == '1'
