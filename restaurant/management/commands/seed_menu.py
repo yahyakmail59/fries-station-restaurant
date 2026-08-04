@@ -36,7 +36,7 @@ CATEGORIES = [
     ('salad', 'سلطات', 'Salad', 'salad', 'salad', 6),
     ('sweets', 'حلويات', 'Sweets', 'dessert', 'sweets', 7),
     ('drinks', 'مشروبات', 'Drinks', 'drink', 'drinks', 8),
-    ('extras', 'إضافات', 'Extras', 'sauce', 'sauces', 9),
+    ('extras', 'إضافات', 'Extras', 'sauce', 'extras', 9),
 ]
 
 # slug, category, ar, en, price, description_ar, description_en, has_photo, featured
